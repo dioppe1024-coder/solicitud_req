@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Logística CAT</title>
+  <style>
+    :root { --cat-yellow: #FFB81C; --cat-black: #222222; --cat-gray: #f4f5f7; --cat-white: #ffffff; }
+    body { font-family: 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%); margin: 0; min-height: 100vh; color: var(--cat-black); }
+    
+    /* Globales */
+    .card { background: var(--cat-white); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
+    th { background: var(--cat-gray); text-align: left; padding: 12px; border-bottom: 2px solid #ccc; }
+    td { padding: 12px; border-bottom: 1px solid #eee; }
+    input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+    button.btn-primary { background: var(--cat-black); color: var(--cat-yellow); border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+    button.btn-primary:hover { background: #000; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Layout Principal */
+    #app-view { display: none; }
+    .topbar { background: var(--cat-black); color: var(--cat-white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--cat-yellow); position: sticky; top: 0; z-index: 100;}
+    .nav-tabs { display: flex; gap: 10px; margin: 20px auto; max-width: 1200px; padding: 0 20px; overflow-x: auto; }
+    .tab { background: var(--cat-white); border: 1px solid #ddd; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap; }
+    .tab.active, .tab:hover { background: var(--cat-yellow); color: var(--cat-black); border-color: var(--cat-yellow); }
+    .main-container { padding: 0 20px; max-width: 1200px; margin: 0 auto; }
+    .modulo { display: none; }
+    .modulo.active { display: block; }
+
+    /* Login */
+    #login-view { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    .login-box { width: 100%; max-width: 400px; }
+  </style>
+</head>
+<body>
+
+  <div id="login-view">
+    <div class="card login-box">
+      <h2 style="border-bottom: 2px solid var(--cat-yellow); padding-bottom:10px; text-align:center;">Acceso al Sistema</h2>
+      <div style="margin-bottom: 15px;"><label>Correo</label><input type="email" id="txtCorreo" required></div>
+      <div style="margin-bottom: 20px;"><label>Contraseña</label><input type="password" id="txtPassword" required></div>
+      <button class="btn-primary" onclick="login()" id="btnLogin" style="width: 100%;">Ingresar</button>
+      <div id="msgLogin" style="color:red; margin-top:10px; text-align:center;"></div>
+    </div>
+  </div>
+
+  <div id="app-view">
+    <div class="topbar">
+      <h3>Logística | CAT</h3>
+      <div><span id="lblUser"></span> | <button onclick="logout()" style="background:transparent; color:var(--cat-yellow); border:1px solid var(--cat-yellow); padding:5px 10px; border-radius:4px; cursor:pointer;">Salir</button></div>
+    </div>
+
+    <div class="nav-tabs" id="menuTabs">
+      <div class="tab" onclick="abrirModulo('modulo-solicitudes')" id="tab-solicitudes">📝 Nuevo Requerimiento</div>
+      <div class="tab" onclick="abrirModulo('modulo-monitor')" id="tab-monitor">📊 Mis Solicitudes</div>
+      <div class="tab" onclick="abrirModulo('modulo-auditoria')" id="tab-auditoria" style="display:none;">🛡️ Auditoría</div>
+      <div class="tab" onclick="abrirModulo('modulo-caja')" id="tab-caja" style="display:none;">💰 Tesorería (Caja)</div>
+    </div>
+
+    <div class="main-container">
+      
+      <div id="modulo-solicitudes" class="modulo card">
+        <h2>Generar Requerimiento</h2>
+        <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
+          <div style="flex:1;"><label>Concepto</label><select id="selConcepto"><option>Cargando...</option></select></div>
+          <div style="flex:1;"><label>Agencia (Opcional)</label><select id="selAgencia"><option value="">Ninguna</option></select></div>
+          <div style="flex:1;"><label>Importe (S/.)</label><input type="number" id="txtImporte" step="0.01"></div>
+          <div style="display:flex; align-items:flex-end;"><button class="btn-primary" onclick="agregarCarrito()">+ Añadir</button></div>
+        </div>
+        <table>
+          <thead><tr><th>Concepto</th><th>Agencia</th><th>Importe</th><th>Acción</th></tr></thead>
+          <tbody id="tbCarrito"></tbody>
+          <tfoot><tr><td colspan="2" style="text-align:right; font-weight:bold;">TOTAL:</td><td colspan="2" id="lblTotal" style="font-weight:bold; color:red;">S/. 0.00</td></tr></tfoot>
+        </table>
+        <div style="text-align:right; margin-top:15px;"><button class="btn-primary" id="btnEmitir" style="display:none;" onclick="emitirTicket()">Emitir Ticket</button></div>
+      </div>
+
+      <div id="modulo-monitor" class="modulo card">
+        <h2>Monitor Operativo</h2>
+        <div id="listaMonitor">Cargando...</div>
+      </div>
+
+      <div id="modulo-auditoria" class="modulo card">
+        <h2>Bandeja de Jefatura</h2>
+        <div id="listaAuditoria">Cargando...</div>
+      </div>
+
+      <div id="modulo-caja" class="modulo card">
+        <h2>Bandeja de Pagos</h2>
+        <div id="listaCaja">Cargando...</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // 🚨 REEMPLAZA ESTO CON LA RUTA REAL DE TU API EN cPANEL 🚨
+    const API_URL = 'https://www.magsa.com.pe/api/';
+    
+    let carrito = [];
+    let maestros = { conceptos: [], agencias: [] };
+
+    // --- ARRANQUE ---
+    window.onload = () => {
+      if(sessionStorage.getItem('id_usuario')) {
+        iniciarApp();
+      }
+    };
+
+    // --- LOGIN ---
+    function login() {
+      let c = document.getElementById('txtCorreo').value, p = document.getElementById('txtPassword').value;
+      if(!c || !p) return;
+      document.getElementById('btnLogin').disabled = true;
+      
+      fetch(API_URL + 'login.php', { method: 'POST', body: JSON.stringify({correo: c, password: p}) })
+      .then(r => r.json())
+      .then(res => {
+        if(res.success) {
+          sessionStorage.setItem('id_usuario', res.id_usuario);
+          sessionStorage.setItem('nombre_usuario', res.nombre);
+          sessionStorage.setItem('rol_usuario', res.rol);
+          sessionStorage.setItem('sede_usuario', res.sede);
+          iniciarApp();
+        } else {
+          document.getElementById('msgLogin').innerText = res.message;
+          document.getElementById('btnLogin').disabled = false;
+        }
+      }).catch(e => { alert("Error de conexión"); document.getElementById('btnLogin').disabled = false; });
+    }
+
+    function logout() { sessionStorage.clear(); window.location.reload(); }
+
+    // --- NAVEGACIÓN Y CONFIGURACIÓN INICIAL ---
+    function iniciarApp() {
+      document.getElementById('login-view').style.display = 'none';
+      document.getElementById('app-view').style.display = 'block';
+      document.getElementById('lblUser').innerText = sessionStorage.getItem('nombre_usuario') + " (" + sessionStorage.getItem('sede_usuario') + ")";
+      
+      if(sessionStorage.getItem('rol_usuario') === 'Admin') {
+        document.getElementById('tab-auditoria').style.display = 'block';
+        document.getElementById('tab-caja').style.display = 'block';
+      }
+      
+      cargarMaestros();
+      abrirModulo('modulo-monitor');
+    }
+
+    function abrirModulo(idModulo) {
+      document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(idModulo).classList.add('active');
+      document.getElementById('tab-' + idModulo.split('-')[1]).classList.add('active');
+
+      if(idModulo === 'modulo-monitor') cargarTickets();
+      if(idModulo === 'modulo-auditoria') cargarTickets();
+      if(idModulo === 'modulo-caja') cargarTickets();
+    }
+
+    // --- CARGA DE MAESTROS (Dropdowns) ---
+    function cargarMaestros() {
+      fetch(API_URL + 'obtener_maestros.php')
+      .then(r => r.json())
+      .then(res => {
+        if(res.success) {
+          maestros = res;
+          document.getElementById('selConcepto').innerHTML = res.conceptos.map(c => `<option value="${c.id_concepto}">${c.nombre_gasto}</option>`).join('');
+          document.getElementById('selAgencia').innerHTML = `<option value="">-- Ninguna --</option>` + res.agencias.map(a => `<option value="${a.id_agencia}">${a.nombre_agencia}</option>`).join('');
+        }
+      });
+    }
+
+    // --- CARRITO DE SOLICITUDES ---
+    function agregarCarrito() {
+      let selC = document.getElementById('selConcepto');
+      let selA = document.getElementById('selAgencia');
+      let imp = parseFloat(document.getElementById('txtImporte').value);
+      
+      if(isNaN(imp) || imp <= 0) return alert("Ingrese un importe válido");
+      
+      carrito.push({
+        id_concepto: selC.value, nombre_concepto: selC.options[selC.selectedIndex].text,
+        id_agencia: selA.value, nombre_agencia: selA.value ? selA.options[selA.selectedIndex].text : 'N/A',
+        importe: imp
+      });
+      document.getElementById('txtImporte').value = '';
+      renderCarrito();
+    }
+
+    function renderCarrito() {
+      let total = 0;
+      document.getElementById('tbCarrito').innerHTML = carrito.map((c, i) => {
+        total += c.importe;
+        return `<tr><td>${c.nombre_concepto}</td><td>${c.nombre_agencia}</td><td>S/ ${c.importe.toFixed(2)}</td><td><button onclick="carrito.splice(${i},1); renderCarrito()">❌</button></td></tr>`;
+      }).join('');
+      document.getElementById('lblTotal').innerText = `S/ ${total.toFixed(2)}`;
+      document.getElementById('btnEmitir').style.display = carrito.length > 0 ? 'inline-block' : 'none';
+    }
+
+    function emitirTicket() {
+      if(!confirm("¿Emitir solicitud?")) return;
+      document.getElementById('btnEmitir').disabled = true;
+      
+      let payload = {
+        id_usuario: sessionStorage.getItem('id_usuario'),
+        sede: sessionStorage.getItem('sede_usuario'),
+        monto_total: carrito.reduce((sum, item) => sum + item.importe, 0),
+        detalles: carrito
+      };
+
+      fetch(API_URL + 'registrar_solicitud.php', { method: 'POST', body: JSON.stringify(payload) })
+      .then(r => r.json())
+      .then(res => {
+        alert(res.message);
+        if(res.success) { carrito = []; renderCarrito(); abrirModulo('modulo-monitor'); }
+        document.getElementById('btnEmitir').disabled = false;
+      });
+    }
+
+    // --- CARGA DE TICKETS (Monitor, Auditoría, Caja) ---
+    function cargarTickets() {
+      let payload = { rol: sessionStorage.getItem('rol_usuario'), id_usuario: sessionStorage.getItem('id_usuario') };
+      
+      fetch(API_URL + 'obtener_tickets.php', { method: 'POST', body: JSON.stringify(payload) })
+      .then(r => r.json())
+      .then(res => {
+        if(res.success) {
+          renderMonitor(res.tickets.filter(t => t.id_solicitante === payload.id_usuario));
+          if(payload.rol === 'Admin') {
+            renderAuditoria(res.tickets.filter(t => t.estado_actual === 'Pendiente'));
+            renderCaja(res.tickets.filter(t => t.estado_actual === 'Aprobado' || t.estado_actual === 'Depositado'));
+          }
+        }
+      });
+    }
+
+    function generarTablaDetalles(detalles) {
+      return `<table style="background:#fafafa; margin-bottom:10px;">
+        <tr><th>Concepto</th><th>Agencia</th><th>Importe</th></tr>
+        ${detalles.map(d => `<tr><td>${d.nombre_gasto}</td><td>${d.nombre_agencia}</td><td>S/ ${d.importe}</td></tr>`).join('')}
+      </table>`;
+    }
+
+    function renderMonitor(tickets) {
+      document.getElementById('listaMonitor').innerHTML = tickets.length ? tickets.map(t => 
+        `<div class="card" style="border-left:4px solid var(--cat-yellow)">
+          <b>${t.id_solicitud}</b> - S/ ${t.monto_total} <span style="float:right; font-weight:bold;">${t.estado_actual}</span>
+          ${generarTablaDetalles(t.detalles)}
+        </div>`
+      ).join('') : 'No hay solicitudes.';
+    }
+
+    function renderAuditoria(tickets) {
+      document.getElementById('listaAuditoria').innerHTML = tickets.length ? tickets.map(t => 
+        `<div class="card" style="border-left:4px solid #d32f2f">
+          <b>${t.id_solicitud}</b> | ${t.solicitante} (${t.sede}) - S/ ${t.monto_total}
+          ${generarTablaDetalles(t.detalles)}
+          <button class="btn-primary" onclick="cambiarEstado('${t.id_solicitud}', 'Aprobado')">✅ Aprobar</button>
+          <button class="btn-primary" style="background:#d32f2f;" onclick="cambiarEstado('${t.id_solicitud}', 'Observado')">⚠️ Observar</button>
+        </div>`
+      ).join('') : 'Bandeja limpia.';
+    }
+
+    function renderCaja(tickets) {
+      document.getElementById('listaCaja').innerHTML = tickets.length ? tickets.map(t => 
+        `<div class="card" style="border-left:4px solid #1565c0; opacity: ${t.estado_actual === 'Depositado' ? '0.6' : '1'}">
+          <b>${t.id_solicitud}</b> | ${t.solicitante} (${t.sede}) - S/ ${t.monto_total} [${t.estado_actual}]
+          ${generarTablaDetalles(t.detalles)}
+          ${t.estado_actual === 'Aprobado' ? `
+            <input type="text" id="op_${t.id_solicitud}" placeholder="N° Operación (Opcional)" style="width:200px; display:inline-block;">
+            <button class="btn-primary" style="background:#1565c0;" onclick="cambiarEstado('${t.id_solicitud}', 'Depositado', document.getElementById('op_${t.id_solicitud}').value)">Confirmar Depósito</button>
+          ` : '<i>Pago Confirmado</i>'}
+        </div>`
+      ).join('') : 'No hay pagos pendientes.';
+    }
+
+    function cambiarEstado(id, estado, comentario = '') {
+      if(!confirm(`¿Marcar ticket como ${estado}?`)) return;
+      let payload = { id_solicitud: id, nuevo_estado: estado, id_usuario: sessionStorage.getItem('id_usuario'), comentario: comentario };
+      
+      fetch(API_URL + 'cambiar_estado.php', { method: 'POST', body: JSON.stringify(payload) })
+      .then(r => r.json())
+      .then(res => { alert(res.message); cargarTickets(); });
+    }
+  </script>
+</body>
+</html>
