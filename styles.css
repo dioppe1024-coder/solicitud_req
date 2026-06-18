@@ -1,0 +1,118 @@
+/* --- DISEÑO RESPONSIVO GLOBAL --- */
+:root {
+    --primary-color: #FFB81C; /* Amarillo CAT */
+    --dark-color: #1a1a1a;
+    --light-bg: #f5f5f7;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background-color: var(--light-bg);
+    color: #333;
+    padding-bottom: 70px; /* Espacio para el menú móvil inferior */
+}
+
+/* Contenedor Principal */
+.main-container {
+    padding: 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Tarjetas */
+.card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+/* Inputs y Selects Adaptados a Dedos Grandes */
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px; /* Evita que iOS haga zoom automático */
+    background-color: #fff;
+    margin-bottom: 12px;
+}
+
+/* Botones Grandes */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--dark-color);
+    font-weight: bold;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 8px;
+    width: 100%;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+/* --- MENÚ DE NAVEGACIÓN MÓVIL (ESTILO APP INFERIOR) --- */
+.nav-tabs {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--dark-color);
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+    z-index: 999;
+    overflow-x: auto; /* Desplazamiento horizontal si hay muchas pestañas */
+    white-space: nowrap;
+}
+
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 15px 10px;
+    color: #aaa;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    min-width: 85px;
+}
+
+.tab.active {
+    color: var(--primary-color);
+    border-top: 3px solid var(--primary-color);
+    background: rgba(255, 184, 28, 0.05);
+}
+
+/* Tablas que se adaptan a pantallas chicas */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
