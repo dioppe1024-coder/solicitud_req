@@ -3,584 +3,1140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sistema de Logística CAT</title>
+  <title>Sistema de Auditoría de Gastos - MAGSA</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root { 
-      --cat-yellow: #FFB81C; 
-      --cat-black: #1a1a1a; 
-      --cat-gray: #f4f5f7; 
-      --cat-white: #ffffff; 
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: #f5f5f7; margin: 0; min-height: 100vh; color: var(--cat-black); padding-bottom: 75px; }
-    .main-container { padding: 15px; max-width: 1200px; margin: 0 auto; }
-    .card { background: var(--cat-white); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; }
-    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
-    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background-color: #fff; margin-bottom: 12px; }
-    .btn-primary { background: var(--cat-yellow); color: var(--cat-black); font-weight: bold; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; transition: background 0.2s; }
-    .btn-primary:hover { background: #e5a517; }
-    .btn-danger { background: #d32f2f; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 8px; border: 1px solid #eee; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th { background: #eee; text-align: left; padding: 12px; border-bottom: 2px solid #ccc; font-weight: 600; }
-    td { padding: 12px; border-bottom: 1px solid #eee; background: #fff; }
-    .nav-tabs { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a1a; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); z-index: 999; overflow-x: auto; white-space: nowrap; }
-    .tab { flex: 1; text-align: center; padding: 15px 10px; color: #aaa; font-size: 12px; font-weight: 500; cursor: pointer; min-width: 90px; transition: all 0.2s; }
-    .tab.active { color: var(--cat-yellow); border-top: 3px solid var(--cat-yellow); background: rgba(255, 184, 28, 0.05); }
-    .modulo { display: none; }
-    /* FIX: login-container tenía error de sintaxis en CSS (faltaba punto y coma) */
-    .login-container { max-width: 400px; margin: 80px auto; padding: 20px; }
+    :root { --yellow:#FFB81C; --black:#1a1a1a; --white:#fff; --gray:#f5f5f7; --green:#2e7d32; --red:#c62828; --blue:#1565c0; --orange:#e65100; --purple:#7b1fa2; }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+    body{background:var(--gray);min-height:100vh;color:var(--black);padding-bottom:82px;}
+    /* TOP */
+    .top-bar{background:var(--black);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100;}
+    .brand{font-weight:800;color:var(--yellow);font-size:16px;letter-spacing:1px;}
+    .top-right{display:flex;align-items:center;gap:8px;}
+    .user-badge{background:#333;padding:5px 12px;border-radius:20px;font-size:13px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .btn-logout{background:var(--red);color:#fff;border:none;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;}
+    /* NOTIF */
+    .notif-btn{position:relative;background:#333;border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+    .notif-badge{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+    .notif-panel{display:none;position:fixed;top:56px;right:10px;width:310px;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:200;max-height:380px;overflow-y:auto;}
+    .notif-panel.open{display:block;}
+    .notif-header{padding:12px 16px;border-bottom:1px solid #eee;font-weight:700;display:flex;justify-content:space-between;align-items:center;}
+    .notif-item{padding:10px 16px;border-bottom:1px solid #f5f5f5;font-size:13px;}
+    .notif-item.no-leida{background:#fffde7;}
+    .notif-fecha{font-size:11px;color:#999;margin-top:3px;}
+    /* LAYOUT */
+    .main-container{padding:15px;max-width:1200px;margin:0 auto;}
+    .card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:20px;margin-bottom:16px;}
+    .card h2{font-size:18px;margin-bottom:4px;}
+    .subtitle{color:#666;font-size:13px;margin-bottom:14px;}
+    /* FORMS */
+    label{display:block;font-weight:600;margin-bottom:5px;font-size:13px;}
+    input,select,textarea{width:100%;padding:11px 12px;border:1px solid #ddd;border-radius:8px;font-size:15px;background:#fff;margin-bottom:12px;transition:border .2s;}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--yellow);}
+    /* BUTTONS */
+    .btn{border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:opacity .2s;display:inline-block;text-align:center;}
+    .btn:hover{opacity:.85;}
+    .btn-primary{background:var(--yellow);color:var(--black);width:100%;font-size:15px;padding:13px;}
+    .btn-dark{background:var(--black);color:#fff;}
+    .btn-success{background:var(--green);color:#fff;}
+    .btn-danger{background:var(--red);color:#fff;}
+    .btn-blue{background:var(--blue);color:#fff;}
+    .btn-purple{background:var(--purple);color:#fff;}
+    .btn-orange{background:var(--orange);color:#fff;}
+    .btn-gray{background:#888;color:#fff;}
+    .btn-sm{padding:5px 11px;font-size:12px;width:auto;}
+    /* GRID */
+    .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+    .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px;}
+    /* KPI */
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:10px;margin-bottom:20px;}
+    .kpi-card{background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.06);border-top:3px solid var(--yellow);}
+    .kpi-num{font-size:24px;font-weight:800;}
+    .kpi-lbl{font-size:11px;color:#888;margin-top:3px;text-transform:uppercase;font-weight:600;}
+    /* TABLES */
+    .table-wrap{width:100%;overflow-x:auto;border-radius:8px;border:1px solid #eee;margin-top:10px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{background:#f0f0f0;text-align:left;padding:10px 12px;font-weight:700;border-bottom:2px solid #ddd;white-space:nowrap;}
+    td{padding:10px 12px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    /* BADGES */
+    .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+    .badge-Pendiente{background:#fff8e1;color:#f57f17;}
+    .badge-Aprobado{background:#e8f5e9;color:#2e7d32;}
+    .badge-Rechazado{background:#ffebee;color:#c62828;}
+    .badge-Pagado{background:#e3f2fd;color:#1565c0;}
+    .badge-Depositado{background:#e3f2fd;color:#1565c0;}
+    .badge-Rendido{background:#f3e5f5;color:#6a1b9a;}
+    .badge-Cerrado{background:#eceff1;color:#455a64;}
+    .badge-Activo{background:#e8f5e9;color:#2e7d32;}
+    .badge-Inactivo{background:#ffebee;color:#c62828;}
+    /* PROGRESS */
+    .progress-bar{background:#eee;border-radius:8px;height:10px;overflow:hidden;margin:6px 0;}
+    .progress-fill{height:100%;border-radius:8px;transition:width .4s;}
+    .prog-ok{background:var(--green);} .prog-warn{background:var(--orange);} .prog-danger{background:var(--red);}
+    /* MODAL */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:16px;}
+    .modal-overlay.open{display:flex;}
+    .modal-box{background:#fff;border-radius:14px;padding:22px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+    .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:#888;line-height:1;}
+    /* ALERTS */
+    .alerta{background:#fff3e0;border-left:4px solid var(--orange);border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;}
+    .alerta.rojo{background:#ffebee;border-color:var(--red);}
+    /* TIMELINE */
+    .tl-item{display:flex;gap:10px;margin-bottom:12px;}
+    .tl-dot{width:10px;height:10px;border-radius:50%;background:var(--yellow);margin-top:4px;flex-shrink:0;}
+    .tl-estado{font-weight:700;font-size:13px;}
+    .tl-meta{font-size:11px;color:#999;}
+    .tl-com{font-size:12px;color:#555;font-style:italic;margin-top:2px;}
+    /* TABS INTERNAS */
+    .inner-tabs{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;}
+    .inner-tab{padding:7px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;background:#eee;color:#555;border:none;}
+    .inner-tab.active{background:var(--black);color:var(--yellow);}
+    /* NAV */
+    .nav-tabs{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--black);box-shadow:0 -3px 10px rgba(0,0,0,.15);z-index:99;overflow-x:auto;}
+    .tab{flex:1;text-align:center;padding:10px 4px 8px;color:#888;font-size:10px;font-weight:600;cursor:pointer;min-width:60px;border-top:3px solid transparent;transition:all .2s;}
+    .tab .ti{font-size:17px;display:block;margin-bottom:2px;}
+    .tab.active{color:var(--yellow);border-top-color:var(--yellow);}
+    .modulo{display:none;}
+    .login-wrap{max-width:400px;margin:60px auto;padding:16px;}
+    hr{border:0;border-top:1px solid #eee;margin:16px 0;}
+    .resumen-box{background:#f9f9f9;border-radius:10px;padding:14px;margin-bottom:14px;}
+    .resumen-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #eee;}
+    .resumen-row:last-child{border-bottom:none;}
+    .resumen-label{color:#666;font-weight:500;}
+    .resumen-value{font-weight:700;}
   </style>
 </head>
 <body>
 
-  <!-- ===================== LOGIN ===================== -->
-  <div id="view-login" class="main-container login-container">
-    <div class="card" style="text-align: center;">
-      <h2 style="margin-bottom: 20px;">🔑 Acceso al Sistema</h2>
-      <div style="text-align: left;">
+<!-- LOGIN -->
+<div id="view-login">
+  <div class="login-wrap">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:42px;margin-bottom:8px;">🚜</div>
+      <h2 style="margin-bottom:4px;">MAGSA Logística</h2>
+      <p class="subtitle">Sistema de Auditoría de Gastos</p>
+      <div style="text-align:left;margin-top:14px;">
         <label>Correo Electrónico</label>
-        <input type="email" id="txtCorreo" placeholder="ejemplo@cat.com">
+        <input type="email" id="txtCorreo" placeholder="correo@magsa.com.pe">
         <label>Contraseña</label>
         <input type="password" id="txtPassword" placeholder="••••••••">
-        <!-- FIX: Añadido listener Enter para login -->
-        <button class="btn-primary" onclick="ejecutarLogin()" style="margin-top: 10px;">Ingresar de Forma Segura</button>
+        <button class="btn btn-primary" onclick="ejecutarLogin()" style="margin-top:6px;">Ingresar al Sistema</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ===================== APP ===================== -->
-  <div id="view-app" style="display: none;">
-
-    <div style="background: #1a1a1a; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-weight: bold; color: var(--cat-yellow);">🚜 LOGÍSTICA CAT</span>
-      <div style="display:flex; gap:10px; align-items:center;">
-        <span id="lblUsuarioNav" style="font-size: 14px; background: #333; padding: 5px 10px; border-radius: 20px;">Usuario</span>
-        <!-- FIX: Botón cerrar sesión agregado -->
-        <button onclick="cerrarSesion()" style="background:#d32f2f; color:#fff; border:none; padding:5px 12px; border-radius:20px; cursor:pointer; font-size:13px;">Salir</button>
-      </div>
+<!-- APP -->
+<div id="view-app" style="display:none;">
+  <div class="top-bar">
+    <span class="brand">🚜 MAGSA</span>
+    <div class="top-right">
+      <button class="notif-btn" onclick="toggleNotif()" id="btnNotif">🔔<span class="notif-badge" id="notifCount" style="display:none;">0</span></button>
+      <span class="user-badge" id="lblUsuario">-</span>
+      <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
     </div>
+  </div>
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-header">
+      <span>Notificaciones</span>
+      <button style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--blue);" onclick="marcarLeidas()">Marcar leídas</button>
+    </div>
+    <div id="notifLista"></div>
+  </div>
 
-    <div class="main-container">
+  <div class="main-container">
 
-      <!-- MÓDULO: NUEVO REQUERIMIENTO -->
-      <div id="modulo-requerimiento" class="modulo card">
-        <h2>Nuevo Requerimiento de Dinero</h2>
-        <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Complete la sede para desplegar el personal autorizado.</p>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+    <!-- MÓDULO: NUEVO REQUERIMIENTO -->
+    <div id="modulo-requerimiento" class="modulo">
+      <div class="card">
+        <h2>📝 Nuevo Requerimiento</h2>
+        <p class="subtitle">Complete los datos y añada los conceptos de gasto.</p>
+        <div class="grid-2">
           <div>
-            <label>1. Seleccione Sede / Departamento</label>
-            <select id="selSedeRequerimiento" onchange="cargarUsuariosPorSede(this.value)">
-              <option value="">-- Seleccione un lugar --</option>
-            </select>
+            <label>Sede / Departamento</label>
+            <select id="selSedeReq" onchange="cargarUsuariosPorSede(this.value)"><option value="">-- Seleccione sede --</option></select>
           </div>
           <div>
-            <label>2. Solicitante Autorizado</label>
-            <select id="selUsuarioRequerimiento">
-              <option value="">-- Seleccione una sede primero --</option>
-            </select>
+            <label>Solicitante Autorizado</label>
+            <select id="selUsuarioReq"><option value="">-- Seleccione sede primero --</option></select>
           </div>
         </div>
-
-        <div>
-          <label>3. Detalle / Motivo del Gasto General</label>
-          <textarea id="txtDetalleGlosa" rows="2" placeholder="Ej. Gastos correspondientes a la compra de repuestos y viáticos de ruta..."></textarea>
+        <label>Motivo / Glosa del Gasto</label>
+        <textarea id="txtGlosa" rows="2" placeholder="Ej. Viáticos y combustible para ruta norte..."></textarea>
+        <hr>
+        <h3 style="font-size:15px;margin-bottom:10px;">Agregar Conceptos al Ticket</h3>
+        <div class="grid-3" style="background:#fafafa;padding:14px;border-radius:8px;margin-bottom:14px;">
+          <div><label>Concepto de Gasto</label><select id="selConcepto"></select></div>
+          <div><label>Agencia / Tercero</label><select id="selAgencia"></select></div>
+          <div><label>Importe (S/.)</label><input type="number" id="txtImporte" step="0.01" min="0.01" placeholder="0.00"></div>
+          <div style="display:flex;align-items:flex-end;"><button class="btn btn-dark btn-sm" onclick="agregarItem()" style="width:100%;">+ Añadir</button></div>
         </div>
-
-        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
-
-        <h3>Agregar Conceptos al Ticket</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-          <div>
-            <label>Concepto de Gasto</label>
-            <select id="selConcepto"></select>
-          </div>
-          <div>
-            <label>Agencia / Tercero</label>
-            <select id="selAgencia"></select>
-          </div>
-          <div>
-            <label>Importe (S/.)</label>
-            <input type="number" id="txtImporte" step="0.01" placeholder="0.00" min="0">
-          </div>
-          <div style="display: flex; align-items: flex-end;">
-            <button class="btn-primary" onclick="agregarItemTabla()" style="background:#222; color:#fff;">+ Añadir Línea</button>
-          </div>
-        </div>
-
-        <div class="table-responsive">
-          <table id="tablaTemporal">
-            <thead>
-              <tr>
-                <th>Concepto</th>
-                <th>Agencia</th>
-                <th>Importe</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
+        <div class="table-wrap">
+          <table id="tablaTemp">
+            <thead><tr><th>Concepto</th><th>Agencia</th><th>Importe</th><th></th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
-
-        <div style="text-align: right; margin-top: 15px; font-size: 18px; font-weight: bold;">
-          Total a Solicitar: S/. <span id="lblTotalTicket">0.00</span>
-        </div>
-
-        <button class="btn-primary" onclick="emitirTicket()" style="margin-top:20px;">🚀 Emitir Ticket de Requerimiento</button>
+        <div style="text-align:right;margin-top:12px;font-size:17px;font-weight:800;">Total: S/. <span id="lblTotal">0.00</span></div>
+        <button class="btn btn-primary" onclick="emitirTicket()" style="margin-top:14px;">🚀 Emitir Ticket de Requerimiento</button>
       </div>
+    </div>
 
-      <!-- MÓDULO: HISTORIAL -->
-      <div id="modulo-historial" class="modulo card">
-        <h2>Bandeja de Requerimientos</h2>
-        <div class="table-responsive">
+    <!-- MÓDULO: BANDEJA -->
+    <div id="modulo-historial" class="modulo">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+          <h2>📂 Bandeja de Requerimientos</h2>
+          <button class="btn btn-success btn-sm" onclick="exportarExcel()">⬇️ Exportar Excel</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <select id="filtroEstado" onchange="cargarTickets()" style="width:auto;margin:0;padding:8px 12px;font-size:13px;">
+            <option value="">Todos los estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Aprobado">Aprobado</option>
+            <option value="Rechazado">Rechazado</option>
+            <option value="Depositado">Depositado</option>
+            <option value="Pagado">Pagado</option>
+            <option value="Rendido">Rendido</option>
+            <option value="Cerrado">Cerrado</option>
+          </select>
+        </div>
+        <div class="table-wrap">
           <table id="tablaTickets">
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Fecha/Hora</th>
-                <th>Solicitante</th>
-                <th>Sede</th>
-                <th>Total</th>
-                <th>Estado</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Código</th><th>Fecha</th><th>Solicitante</th><th>Sede</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
       </div>
-
-      <!-- MÓDULO: USUARIOS -->
-      <div id="modulo-usuarios" class="modulo card">
-        <h2>Gestión de Usuarios</h2>
-        <p style="color:#666; margin-bottom:15px;">Registrar nuevo encargado.</p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
-          <div>
-            <label>Nombre Completo</label>
-            <input type="text" id="txtNombreUsuario" placeholder="Ej. Juan Pérez">
-          </div>
-          <div>
-            <label>Correo Electrónico</label>
-            <input type="email" id="txtCorreoUsuario" placeholder="juan@empresa.com">
-          </div>
-          <div>
-            <label>Contraseña</label>
-            <input type="password" id="txtPassUsuario" placeholder="Mínimo 6 caracteres">
-          </div>
-          <div>
-            <label>Rol</label>
-            <select id="selRolUsuario">
-              <option value="Usuario">Usuario</option>
-              <option value="Admin">Admin</option>
-            </select>
-          </div>
-          <div>
-            <label>Sede</label>
-            <select id="selSedeUsuario">
-              <option value="">-- Cargando sedes --</option>
-            </select>
-          </div>
-        </div>
-        <button class="btn-primary" onclick="registrarUsuario()" style="margin-top:15px;">Guardar Nuevo Encargado</button>
-      </div>
-
-      <!-- MÓDULO: REPORTES -->
-      <div id="modulo-reportes" class="modulo card">
-        <h2>Dashboard Gerencial</h2>
-        <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:15px;">
-          <div style="flex:1; min-width:300px; padding:15px; border:1px solid #eee; border-radius:8px;">
-            <h3 style="text-align:center; margin-bottom:10px;">Distribución por Estado (S/.)</h3>
-            <canvas id="chartEstado"></canvas>
-          </div>
-          <div style="flex:1; min-width:300px; padding:15px; border:1px solid #eee; border-radius:8px;">
-            <h3 style="text-align:center; margin-bottom:10px;">Gasto por Concepto (S/.)</h3>
-            <canvas id="chartConcepto"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- MÓDULO: SEDES -->
-      <div id="modulo-sedes" class="modulo card">
-        <h2>Administración de Sedes</h2>
-        <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px; align-items:flex-end;">
-          <div style="flex:1; min-width:250px;">
-            <label>Nombre de la Nueva Sede</label>
-            <input type="text" id="txtNuevaSedeAdmin" placeholder="Ej. Sucursal Piura">
-          </div>
-          <div>
-            <button class="btn-primary" onclick="crearSede()" style="width:auto; padding:12px 25px;">Guardar Sede</button>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- fin main-container -->
-
-    <!-- BARRA DE NAVEGACIÓN INFERIOR -->
-    <div class="nav-tabs">
-      <div class="tab" onclick="abrirModulo('modulo-requerimiento')" id="tab-requerimiento">📝 Nuevo Req.</div>
-      <div class="tab" onclick="abrirModulo('modulo-historial')" id="tab-historial">📂 Bandeja</div>
-      <div class="tab" onclick="abrirModulo('modulo-reportes')" id="tab-reportes" style="display:none;">📈 Reportes</div>
-      <div class="tab" onclick="abrirModulo('modulo-sedes')" id="tab-sedes" style="display:none;">🏢 Sedes</div>
-      <div class="tab" onclick="abrirModulo('modulo-usuarios')" id="tab-usuarios" style="display:none;">👥 Usuarios</div>
     </div>
 
-  </div><!-- fin view-app -->
+    <!-- MÓDULO: REPORTES -->
+    <div id="modulo-reportes" class="modulo">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+          <h2>📈 Dashboard Gerencial</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select id="selMesRep" style="width:auto;margin:0;padding:8px;font-size:13px;"></select>
+            <select id="selAnioRep" style="width:auto;margin:0;padding:8px;font-size:13px;"></select>
+            <button class="btn btn-dark btn-sm" onclick="cargarReportes()">Actualizar</button>
+            <button class="btn btn-success btn-sm" onclick="exportarExcelReporte()">⬇️ Excel</button>
+          </div>
+        </div>
+        <div class="kpi-grid" id="kpiGrid"></div>
+        <div id="alertasDiv"></div>
+        <div class="grid-2">
+          <div style="padding:14px;border:1px solid #eee;border-radius:10px;"><p style="font-size:13px;font-weight:700;margin-bottom:10px;">Por Estado</p><canvas id="chartEstado"></canvas></div>
+          <div style="padding:14px;border:1px solid #eee;border-radius:10px;"><p style="font-size:13px;font-weight:700;margin-bottom:10px;">Gasto por Concepto (S/.)</p><canvas id="chartConcepto"></canvas></div>
+          <div style="padding:14px;border:1px solid #eee;border-radius:10px;"><p style="font-size:13px;font-weight:700;margin-bottom:10px;">Gasto por Sede (S/.)</p><canvas id="chartSede"></canvas></div>
+          <div style="padding:14px;border:1px solid #eee;border-radius:10px;"><p style="font-size:13px;font-weight:700;margin-bottom:10px;">Tendencia 6 Meses</p><canvas id="chartTendencia"></canvas></div>
+        </div>
+      </div>
+    </div>
 
-  <script>
-    // ===================== CONFIGURACIÓN =====================
-    const API_URL = "https://www.magsa.com.pe/api/";
-    let usuarioLogueado = null;
-    let maestros = { conceptos: [], agencias: [] };
-    let listaItemsTemporal = [];
-    let chartEstadoInst = null;
-    let chartConceptoInst = null;
+    <!-- MÓDULO: PRESUPUESTOS -->
+    <div id="modulo-presupuestos" class="modulo">
+      <div class="card">
+        <h2>💰 Control de Presupuestos</h2>
+        <p class="subtitle">Asigne y monitoree el presupuesto mensual por sede.</p>
+        <div class="grid-3" style="background:#fafafa;padding:14px;border-radius:8px;margin-bottom:16px;">
+          <div><label>Sede</label><select id="selSedePres"></select></div>
+          <div><label>Mes</label><select id="selMesPres"></select></div>
+          <div><label>Año</label><input type="number" id="txtAnioPres" min="2024" max="2030"></div>
+          <div><label>Monto (S/.)</label><input type="number" id="txtMontoPres" step="0.01" min="0" placeholder="0.00"></div>
+          <div style="display:flex;align-items:flex-end;"><button class="btn btn-success btn-sm" onclick="guardarPresupuesto()" style="width:100%;">Guardar</button></div>
+        </div>
+        <h3 style="font-size:15px;margin-bottom:10px;">Estado del Mes Actual</h3>
+        <div id="presupuestosLista"></div>
+      </div>
+    </div>
 
-    // ===================== LOGIN =====================
-    // FIX: Enter en los campos dispara el login
-    document.getElementById('txtCorreo').addEventListener('keypress', e => { if(e.key === 'Enter') ejecutarLogin(); });
-    document.getElementById('txtPassword').addEventListener('keypress', e => { if(e.key === 'Enter') ejecutarLogin(); });
+    <!-- MÓDULO: SEDES -->
+    <div id="modulo-sedes" class="modulo">
+      <div class="card">
+        <h2>🏢 Administración de Sedes</h2>
+        <div class="grid-2" style="align-items:flex-end;margin-bottom:8px;">
+          <div><label>Nombre de la Nueva Sede</label><input type="text" id="txtNuevaSede" placeholder="Ej. Sucursal Piura"></div>
+          <button class="btn btn-primary" onclick="crearSede()">+ Agregar Sede</button>
+        </div>
+        <hr>
+        <h3 style="font-size:15px;margin-bottom:10px;">Listado de Sedes</h3>
+        <div class="table-wrap">
+          <table id="tablaSedesAdmin">
+            <thead><tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
 
-    function ejecutarLogin() {
-      let correo = document.getElementById('txtCorreo').value.trim();
-      let pass   = document.getElementById('txtPassword').value;
+    <!-- MÓDULO: USUARIOS -->
+    <div id="modulo-usuarios" class="modulo">
+      <div class="card">
+        <h2>👥 Gestión de Usuarios</h2>
+        <div class="inner-tabs">
+          <button class="inner-tab active" onclick="switchUserTab('nuevo')">➕ Nuevo Usuario</button>
+          <button class="inner-tab" onclick="switchUserTab('listado')">📋 Listado</button>
+        </div>
+        <!-- Tab: Nuevo -->
+        <div id="userTab-nuevo">
+          <div class="grid-2">
+            <div><label>Nombre Completo</label><input type="text" id="txtNombreUsr" placeholder="Juan Pérez"></div>
+            <div><label>Correo Electrónico</label><input type="email" id="txtCorreoUsr" placeholder="juan@magsa.com.pe"></div>
+            <div><label>Contraseña</label><input type="password" id="txtPassUsr" placeholder="Mínimo 6 caracteres"></div>
+            <div>
+              <label>Rol</label>
+              <select id="selRolUsr">
+                <option value="Usuario">Usuario — crea requerimientos</option>
+                <option value="Pagador">Pagador — marca pagado/depositado</option>
+                <option value="Admin">Admin — acceso total</option>
+              </select>
+            </div>
+            <div><label>Sede de Operación</label><select id="selSedeUsr"></select></div>
+          </div>
+          <button class="btn btn-primary" onclick="registrarUsuario()" style="margin-top:6px;">Guardar Encargado</button>
+        </div>
+        <!-- Tab: Listado -->
+        <div id="userTab-listado" style="display:none;">
+          <div class="table-wrap">
+            <table id="tablaUsuariosAdmin">
+              <thead><tr><th>ID</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Sede</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      if(!correo || !pass) return alert("Por favor complete las casillas.");
+    <!-- MÓDULO: MAESTROS (Conceptos y Agencias) -->
+    <div id="modulo-maestros" class="modulo">
+      <div class="card">
+        <h2>🗂️ Maestros del Sistema</h2>
+        <div class="inner-tabs">
+          <button class="inner-tab active" onclick="switchMaestroTab('conceptos')">💡 Conceptos de Gasto</button>
+          <button class="inner-tab" onclick="switchMaestroTab('agencias')">🏭 Agencias / Terceros</button>
+        </div>
+        <!-- Conceptos -->
+        <div id="maestroTab-conceptos">
+          <div class="grid-2" style="align-items:flex-end;margin-bottom:10px;">
+            <div><label>Nombre del Concepto</label><input type="text" id="txtNuevoConcepto" placeholder="Ej. Combustible"></div>
+            <button class="btn btn-primary" onclick="crearMaestro('conceptos_gasto')">+ Agregar Concepto</button>
+          </div>
+          <div class="table-wrap">
+            <table id="tablaConceptos">
+              <thead><tr><th>ID</th><th>Nombre</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Agencias -->
+        <div id="maestroTab-agencias" style="display:none;">
+          <div class="grid-3" style="align-items:flex-end;margin-bottom:10px;">
+            <div><label>Nombre Agencia / Tercero</label><input type="text" id="txtNuevoAgencia" placeholder="Ej. Repsol"></div>
+            <div><label>Zona de Cobertura</label><input type="text" id="txtNuevoZona" placeholder="Ej. Norte"></div>
+            <button class="btn btn-primary" onclick="crearMaestro('agencias_terceros')" style="margin-top:18px;">+ Agregar</button>
+          </div>
+          <div class="table-wrap">
+            <table id="tablaAgencias">
+              <thead><tr><th>ID</th><th>Nombre</th><th>Zona</th><th>Estado</th><th>Acciones</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      fetch(API_URL + 'login.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }, // FIX: header agregado
-        body: JSON.stringify({ correo: correo, password: pass })
-      })
-      .then(r => r.json())
-      .then(res => {
-        if(res.success) {
-          iniciarApp(res);
-        } else {
-          alert(res.message || "Credenciales incorrectas.");
-        }
-      })
-      .catch(e => alert("Error conectando con el servidor API."));
+  </div><!-- fin main-container -->
+
+  <!-- NAV INFERIOR -->
+  <div class="nav-tabs">
+    <div class="tab active" onclick="abrirModulo('modulo-requerimiento')" id="tab-requerimiento"><span class="ti">📝</span>Nuevo</div>
+    <div class="tab" onclick="abrirModulo('modulo-historial')" id="tab-historial"><span class="ti">📂</span>Bandeja</div>
+    <div class="tab" onclick="abrirModulo('modulo-reportes')" id="tab-reportes" style="display:none;"><span class="ti">📈</span>Reportes</div>
+    <div class="tab" onclick="abrirModulo('modulo-presupuestos')" id="tab-presupuestos" style="display:none;"><span class="ti">💰</span>Presup.</div>
+    <div class="tab" onclick="abrirModulo('modulo-maestros')" id="tab-maestros" style="display:none;"><span class="ti">🗂️</span>Maestros</div>
+    <div class="tab" onclick="abrirModulo('modulo-sedes')" id="tab-sedes" style="display:none;"><span class="ti">🏢</span>Sedes</div>
+    <div class="tab" onclick="abrirModulo('modulo-usuarios')" id="tab-usuarios" style="display:none;"><span class="ti">👥</span>Usuarios</div>
+  </div>
+</div>
+
+<!-- MODAL: VER DETALLE TICKET -->
+<div class="modal-overlay" id="modalDetalle">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modalTitulo">Detalle del Requerimiento</h3>
+      <button class="modal-close" onclick="cerrarModal('modalDetalle')">✕</button>
+    </div>
+    <div id="modalContenido"></div>
+  </div>
+</div>
+
+<!-- MODAL: CAMBIAR ESTADO -->
+<div class="modal-overlay" id="modalEstado">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Cambiar Estado</h3>
+      <button class="modal-close" onclick="cerrarModal('modalEstado')">✕</button>
+    </div>
+    <input type="hidden" id="estadoTicketId">
+    <p class="subtitle" id="estadoTicketInfo"></p>
+    <label>Nuevo Estado</label>
+    <select id="selNuevoEstado"></select>
+    <label>Comentario / Motivo</label>
+    <textarea id="txtComentarioEstado" rows="3" placeholder="Requerido si rechaza..."></textarea>
+    <button class="btn btn-primary" onclick="confirmarCambioEstado()">Confirmar Cambio</button>
+  </div>
+</div>
+
+<!-- MODAL: RENDICIÓN -->
+<div class="modal-overlay" id="modalRendicion">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Registrar Rendición de Gastos</h3>
+      <button class="modal-close" onclick="cerrarModal('modalRendicion')">✕</button>
+    </div>
+    <input type="hidden" id="rendicionId">
+    <input type="hidden" id="rendicionMonto">
+    <p class="subtitle" id="rendicionInfo"></p>
+    <label>Monto Real Gastado (S/.)</label>
+    <input type="number" id="txtMontoGastado" step="0.01" min="0" placeholder="0.00" oninput="calcularDevolucion()">
+    <label>Observaciones</label>
+    <textarea id="txtObsRendicion" rows="2" placeholder="Ej. Sobró S/. 50 por cambio de itinerario..."></textarea>
+    <div id="rendicionCalculo" style="background:#f5f5f5;padding:12px;border-radius:8px;margin-bottom:12px;font-size:13px;display:none;"></div>
+    <button class="btn btn-primary" onclick="confirmarRendicion()">Registrar Rendición</button>
+  </div>
+</div>
+
+<!-- MODAL: COMPROBANTES -->
+<div class="modal-overlay" id="modalComprobantes">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Comprobantes Adjuntos</h3>
+      <button class="modal-close" onclick="cerrarModal('modalComprobantes')">✕</button>
+    </div>
+    <input type="hidden" id="compTicketId">
+    <label>Subir Comprobante (JPG, PNG o PDF — máx. 5MB)</label>
+    <input type="file" id="inputComp" accept=".jpg,.jpeg,.png,.pdf">
+    <button class="btn btn-blue btn-sm" onclick="subirComprobante()" style="width:100%;margin-bottom:16px;">📎 Subir Archivo</button>
+    <div id="listaComp"></div>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR USUARIO -->
+<div class="modal-overlay" id="modalEditUsuario">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Editar Usuario</h3>
+      <button class="modal-close" onclick="cerrarModal('modalEditUsuario')">✕</button>
+    </div>
+    <input type="hidden" id="editUsrId">
+    <label>Nombre Completo</label><input type="text" id="editUsrNombre">
+    <label>Correo</label><input type="email" id="editUsrCorreo">
+    <label>Nueva Contraseña (dejar vacío para no cambiar)</label><input type="password" id="editUsrPass" placeholder="••••••••">
+    <label>Rol</label>
+    <select id="editUsrRol">
+      <option value="Usuario">Usuario</option>
+      <option value="Pagador">Pagador</option>
+      <option value="Admin">Admin</option>
+    </select>
+    <label>Sede</label><select id="editUsrSede"></select>
+    <label>Estado</label>
+    <select id="editUsrEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select>
+    <button class="btn btn-primary" onclick="guardarEditUsuario()">Guardar Cambios</button>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR SEDE -->
+<div class="modal-overlay" id="modalEditSede">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Editar Sede</h3>
+      <button class="modal-close" onclick="cerrarModal('modalEditSede')">✕</button>
+    </div>
+    <input type="hidden" id="editSedeId">
+    <label>Nombre de la Sede</label><input type="text" id="editSedeNombre">
+    <label>Estado</label>
+    <select id="editSedeEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select>
+    <button class="btn btn-primary" onclick="guardarEditSede()">Guardar Cambios</button>
+  </div>
+</div>
+
+<!-- MODAL: EDITAR MAESTRO -->
+<div class="modal-overlay" id="modalEditMaestro">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="editMaestroTitulo">Editar Registro</h3>
+      <button class="modal-close" onclick="cerrarModal('modalEditMaestro')">✕</button>
+    </div>
+    <input type="hidden" id="editMaestroId">
+    <input type="hidden" id="editMaestroTabla">
+    <label>Nombre</label><input type="text" id="editMaestroNombre">
+    <div id="editMaestroZonaDiv" style="display:none;"><label>Zona de Cobertura</label><input type="text" id="editMaestroZona"></div>
+    <label>Estado</label>
+    <select id="editMaestroEstado"><option value="Activo">Activo</option><option value="Inactivo">Inactivo</option></select>
+    <button class="btn btn-primary" onclick="guardarEditMaestro()">Guardar Cambios</button>
+  </div>
+</div>
+
+<script>
+// ===================== CONFIG =====================
+const API_URL = "https://www.magsa.com.pe/api/";
+let usuarioLogueado = null;
+let listaItems = [];
+let charts = {};
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// ===================== LOGIN =====================
+document.getElementById('txtCorreo').addEventListener('keypress',   e => { if(e.key==='Enter') ejecutarLogin(); });
+document.getElementById('txtPassword').addEventListener('keypress', e => { if(e.key==='Enter') ejecutarLogin(); });
+
+function ejecutarLogin() {
+  let correo = document.getElementById('txtCorreo').value.trim();
+  let pass   = document.getElementById('txtPassword').value;
+  if (!correo || !pass) return alert("Complete las casillas.");
+  fetch(API_URL + 'login.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ correo, password: pass }) })
+  .then(r => r.json())
+  .then(res => { res.success ? iniciarApp(res) : alert(res.message || "Credenciales incorrectas."); })
+  .catch(() => alert("Error conectando con el servidor."));
+}
+
+// ===================== APP =====================
+function iniciarApp(u) {
+  usuarioLogueado = u;
+  document.getElementById('view-login').style.display = 'none';
+  document.getElementById('view-app').style.display   = 'block';
+  document.getElementById('lblUsuario').innerText = u.nombre + ' · ' + u.rol;
+
+  let esAdmin  = u.rol === 'Admin';
+  let esPagador = u.rol === 'Pagador';
+
+  // Pestañas según rol
+  document.getElementById('tab-reportes').style.display    = esAdmin ? 'flex' : 'none';
+  document.getElementById('tab-presupuestos').style.display = esAdmin ? 'flex' : 'none';
+  document.getElementById('tab-maestros').style.display    = esAdmin ? 'flex' : 'none';
+  document.getElementById('tab-sedes').style.display       = esAdmin ? 'flex' : 'none';
+  document.getElementById('tab-usuarios').style.display    = esAdmin ? 'flex' : 'none';
+
+  // Pagador solo ve bandeja
+  if (esPagador) {
+    document.getElementById('tab-requerimiento').style.display = 'none';
+    abrirModulo('modulo-historial');
+  } else {
+    cargarMaestros();
+    cargarSedesEnFormulario();
+    abrirModulo('modulo-requerimiento');
+  }
+  iniciarNotificaciones();
+}
+
+function cerrarSesion() {
+  if (!confirm("¿Desea cerrar sesión?")) return;
+  usuarioLogueado = null; listaItems = [];
+  clearInterval(window._notifInt);
+  document.getElementById('view-app').style.display   = 'none';
+  document.getElementById('view-login').style.display = 'block';
+  document.getElementById('txtCorreo').value = '';
+  document.getElementById('txtPassword').value = '';
+}
+
+// ===================== NAVEGACIÓN =====================
+function abrirModulo(id) {
+  document.querySelectorAll('.modulo').forEach(m => m.style.display = 'none');
+  let mod = document.getElementById(id);
+  if (mod) mod.style.display = 'block';
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  let map = { 'modulo-requerimiento':'tab-requerimiento','modulo-historial':'tab-historial',
+              'modulo-reportes':'tab-reportes','modulo-presupuestos':'tab-presupuestos',
+              'modulo-maestros':'tab-maestros','modulo-sedes':'tab-sedes','modulo-usuarios':'tab-usuarios' };
+  if (map[id]) document.getElementById(map[id]).classList.add('active');
+  if (id === 'modulo-historial')    cargarTickets();
+  if (id === 'modulo-reportes')     { initFechas(); cargarReportes(); }
+  if (id === 'modulo-presupuestos') { initPresupuestoForm(); cargarPresupuestos(); }
+  if (id === 'modulo-sedes')        cargarTablaSedes();
+  if (id === 'modulo-usuarios')     { cargarSedesSelectUsr(); switchUserTab('nuevo'); }
+  if (id === 'modulo-maestros')     { switchMaestroTab('conceptos'); }
+}
+
+// ===================== NOTIFICACIONES =====================
+function iniciarNotificaciones() {
+  cargarNotificaciones();
+  window._notifInt = setInterval(cargarNotificaciones, 30000);
+}
+function cargarNotificaciones() {
+  if (!usuarioLogueado) return;
+  fetch(API_URL + 'notificaciones.php?id_usuario=' + usuarioLogueado.id_usuario)
+  .then(r => r.json()).then(data => {
+    let badge = document.getElementById('notifCount');
+    badge.style.display = data.no_leidas > 0 ? 'flex' : 'none';
+    badge.innerText = data.no_leidas;
+    document.getElementById('notifLista').innerHTML = data.notificaciones && data.notificaciones.length > 0
+      ? data.notificaciones.map(n => `<div class="notif-item ${n.leida==0?'no-leida':''}">
+          <div>${n.mensaje}</div><div class="notif-fecha">${n.fecha}</div></div>`).join('')
+      : '<div style="padding:16px;text-align:center;color:#999;font-size:13px;">Sin notificaciones</div>';
+  }).catch(() => {});
+}
+function toggleNotif() { document.getElementById('notifPanel').classList.toggle('open'); }
+function marcarLeidas() {
+  fetch(API_URL + 'notificaciones.php', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ marcar_leidas: true, id_usuario: usuarioLogueado.id_usuario }) })
+  .then(() => cargarNotificaciones());
+  document.getElementById('notifPanel').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  let p = document.getElementById('notifPanel'), b = document.getElementById('btnNotif');
+  if (p && b && !p.contains(e.target) && !b.contains(e.target)) p.classList.remove('open');
+});
+
+// ===================== MAESTROS =====================
+function cargarMaestros() {
+  fetch(API_URL + 'obtener_maestros.php').then(r => r.json()).then(res => {
+    if (!res.success) return;
+    document.getElementById('selConcepto').innerHTML = res.conceptos.map(c =>
+      `<option value="${c.id_concepto}">${c.nombre_gasto}</option>`).join('');
+    document.getElementById('selAgencia').innerHTML = `<option value="">-- Ninguna --</option>` +
+      res.agencias.map(a => `<option value="${a.id_agencia}">${a.nombre_agencia}</option>`).join('');
+  });
+}
+function cargarSedesEnFormulario() {
+  fetch(API_URL + 'obtener_sedes.php').then(r => r.json()).then(data => {
+    let opts = '<option value="">-- Seleccione sede --</option>' +
+      data.map(s => `<option value="${s.nombre_sede}">${s.nombre_sede}</option>`).join('');
+    document.getElementById('selSedeReq').innerHTML = opts;
+  });
+}
+function cargarSedesSelectUsr() {
+  fetch(API_URL + 'obtener_sedes.php').then(r => r.json()).then(data => {
+    let opts = '<option value="">-- Seleccione sede --</option>' +
+      data.map(s => `<option value="${s.nombre_sede}">${s.nombre_sede}</option>`).join('');
+    document.getElementById('selSedeUsr').innerHTML = opts;
+    document.getElementById('editUsrSede').innerHTML = opts;
+  });
+}
+function cargarUsuariosPorSede(sede) {
+  let combo = document.getElementById('selUsuarioReq');
+  if (!sede) { combo.innerHTML = '<option value="">-- Seleccione sede primero --</option>'; return; }
+  combo.innerHTML = '<option value="">Cargando...</option>';
+  fetch(API_URL + 'obtener_usuarios_sede.php?sede=' + encodeURIComponent(sede))
+  .then(r => r.json()).then(data => {
+    combo.innerHTML = data.length === 0
+      ? '<option value="">⚠️ Sin usuarios en esta sede</option>'
+      : '<option value="">-- Seleccione solicitante --</option>' +
+        data.map(u => `<option value="${u.id_usuario}">${u.nombre_completo}</option>`).join('');
+  });
+}
+
+// ===================== TICKET =====================
+function agregarItem() {
+  let idC = document.getElementById('selConcepto').value;
+  let idA = document.getElementById('selAgencia').value;
+  let imp = parseFloat(document.getElementById('txtImporte').value);
+  if (!idC) return alert("Seleccione un concepto.");
+  if (!imp || imp <= 0) return alert("Ingrese un importe válido.");
+  let selC = document.getElementById('selConcepto'), selA = document.getElementById('selAgencia');
+  listaItems.push({ id_concepto:idC, nombre_concepto:selC.options[selC.selectedIndex].text,
+    id_agencia:idA||'N/A', nombre_agencia:idA?selA.options[selA.selectedIndex].text:'N/A', importe:imp });
+  document.getElementById('txtImporte').value = '';
+  renderTabla();
+}
+function quitarItem(i) { listaItems.splice(i,1); renderTabla(); }
+function renderTabla() {
+  let tbody = document.querySelector('#tablaTemp tbody'), total = 0;
+  tbody.innerHTML = listaItems.length === 0
+    ? '<tr><td colspan="4" style="text-align:center;color:#999;padding:18px;">Sin conceptos</td></tr>'
+    : listaItems.map((it,i) => { total += it.importe;
+        return `<tr><td>${it.nombre_concepto}</td><td>${it.nombre_agencia}</td>
+          <td>S/. ${it.importe.toFixed(2)}</td>
+          <td><button class="btn btn-danger btn-sm" onclick="quitarItem(${i})">✕</button></td></tr>`;
+      }).join('');
+  document.getElementById('lblTotal').innerText = total.toFixed(2);
+}
+function emitirTicket() {
+  let sede  = document.getElementById('selSedeReq').value;
+  let sol   = document.getElementById('selUsuarioReq').value;
+  let glosa = document.getElementById('txtGlosa').value.trim();
+  let total = parseFloat(document.getElementById('lblTotal').innerText);
+  if (!sede)  return alert("Seleccione una sede.");
+  if (!sol)   return alert("Seleccione un solicitante.");
+  if (!glosa) return alert("Ingrese el motivo del gasto.");
+  if (listaItems.length === 0) return alert("Añada al menos un concepto.");
+  fetch(API_URL + 'registrar_solicitud.php', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ id_usuario:sol, sede, detalles:glosa, monto_total:total, items:listaItems }) })
+  .then(r => r.json()).then(res => {
+    alert(res.message);
+    if (res.success) {
+      listaItems = [];
+      document.getElementById('txtGlosa').value = '';
+      document.getElementById('selSedeReq').value = '';
+      document.getElementById('selUsuarioReq').innerHTML = '<option value="">-- Seleccione sede primero --</option>';
+      renderTabla(); abrirModulo('modulo-historial');
     }
+  }).catch(() => alert("Error al conectar."));
+}
 
-    // ===================== INICIAR APP =====================
-    function iniciarApp(usuario) {
-      usuarioLogueado = usuario;
-      document.getElementById('view-login').style.display = 'none';
-      document.getElementById('view-app').style.display   = 'block';
-      document.getElementById('lblUsuarioNav').innerText  = usuario.nombre + ' (' + usuario.rol + ')';
-
-      // Mostrar/ocultar pestañas según rol
-      let esAdmin = (usuario.rol === 'Admin');
-      ['tab-usuarios','tab-reportes','tab-sedes'].forEach(id => {
-        document.getElementById(id).style.display = esAdmin ? 'block' : 'none';
-      });
-
-      cargarMaestros();
-      cargarSedesEnFormulario();
-      abrirModulo('modulo-requerimiento');
+// ===================== BANDEJA =====================
+function badge(e) {
+  return `<span class="badge badge-${e||'Pendiente'}">${e||'—'}</span>`;
+}
+function cargarTickets() {
+  let filtro = document.getElementById('filtroEstado').value;
+  fetch(API_URL + 'obtener_tickets.php', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ rol:usuarioLogueado.rol, id_usuario:usuarioLogueado.id_usuario }) })
+  .then(r => r.json()).then(data => {
+    let tickets = data.tickets || [];
+    if (filtro) tickets = tickets.filter(t => t.estado_actual === filtro);
+    let tbody = document.querySelector('#tablaTickets tbody');
+    if (tickets.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:20px;">No hay requerimientos.</td></tr>'; return;
     }
+    tbody.innerHTML = tickets.map(t => {
+      let acc = `<button class="btn btn-dark btn-sm" onclick='verDetalle(${JSON.stringify(t)})'>🔍 Ver</button> `;
+      // Admin puede aprobar/rechazar/cerrar
+      if (usuarioLogueado.rol === 'Admin')
+        acc += `<button class="btn btn-blue btn-sm" onclick="abrirCambioEstado('${t.id_solicitud}','${t.estado_actual}',${t.monto_total})">Estado</button> `;
+      // Pagador solo puede poner pagado/depositado
+      if (usuarioLogueado.rol === 'Pagador' && t.estado_actual === 'Aprobado')
+        acc += `<button class="btn btn-success btn-sm" onclick="abrirCambioEstado('${t.id_solicitud}','${t.estado_actual}',${t.monto_total})">💰 Pagar</button> `;
+      // Usuario puede rendir si está pagado/depositado y es el solicitante
+      if (['Pagado','Depositado'].includes(t.estado_actual) && t.id_solicitante === usuarioLogueado.id_usuario)
+        acc += `<button class="btn btn-orange btn-sm" onclick="abrirRendicion('${t.id_solicitud}',${t.monto_total})">📋 Rendir</button> `;
+      acc += `<button class="btn btn-purple btn-sm" onclick="abrirComprobantes('${t.id_solicitud}')">📎</button>`;
+      return `<tr>
+        <td><strong>${t.id_solicitud}</strong></td>
+        <td style="white-space:nowrap;">${(t.fecha_hora||'').substring(0,16)}</td>
+        <td>${t.solicitante}</td><td>${t.sede}</td>
+        <td style="white-space:nowrap;font-weight:700;">S/. ${parseFloat(t.monto_total).toFixed(2)}</td>
+        <td>${badge(t.estado_actual)}</td>
+        <td style="white-space:nowrap;">${acc}</td></tr>`;
+    }).join('');
+  });
+}
 
-    // ===================== CERRAR SESIÓN =====================
-    function cerrarSesion() {
-      if(!confirm("¿Desea cerrar sesión?")) return;
-      usuarioLogueado = null;
-      listaItemsTemporal = [];
-      document.getElementById('view-app').style.display   = 'none';
-      document.getElementById('view-login').style.display = 'block';
-      document.getElementById('txtCorreo').value    = '';
-      document.getElementById('txtPassword').value  = '';
+// VER DETALLE — resumen completo
+function verDetalle(t) {
+  document.getElementById('modalTitulo').innerText = '📄 ' + t.id_solicitud;
+  let detalles = (t.detalles||[]).map(d =>
+    `<tr><td>${d.nombre_gasto}</td><td>${d.nombre_agencia||'N/A'}</td><td style="font-weight:700;">S/. ${parseFloat(d.importe).toFixed(2)}</td></tr>`).join('');
+  document.getElementById('modalContenido').innerHTML = `
+    <div class="resumen-box">
+      <div class="resumen-row"><span class="resumen-label">Solicitante</span><span class="resumen-value">${t.solicitante}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Sede</span><span class="resumen-value">${t.sede}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Fecha</span><span class="resumen-value">${(t.fecha_hora||'').substring(0,16)}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Estado</span><span class="resumen-value">${badge(t.estado_actual)}</span></div>
+      <div class="resumen-row"><span class="resumen-label">Monto Total</span><span class="resumen-value" style="font-size:16px;color:var(--blue);">S/. ${parseFloat(t.monto_total).toFixed(2)}</span></div>
+      ${t.monto_rendido > 0 ? `<div class="resumen-row"><span class="resumen-label">Monto Rendido</span><span class="resumen-value">S/. ${parseFloat(t.monto_rendido).toFixed(2)}</span></div>` : ''}
+    </div>
+    <p style="font-size:14px;font-weight:700;margin-bottom:8px;">Conceptos de Gasto</p>
+    <div class="table-wrap">
+      <table><thead><tr><th>Concepto</th><th>Agencia</th><th>Importe</th></tr></thead>
+      <tbody>${detalles||'<tr><td colspan="3" style="text-align:center;color:#999;">Sin detalle</td></tr>'}</tbody></table>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-dark btn-sm" onclick="verHistorial('${t.id_solicitud}')">📋 Ver Historial</button>
+      <button class="btn btn-purple btn-sm" onclick="cerrarModal('modalDetalle');abrirComprobantes('${t.id_solicitud}')">📎 Comprobantes</button>
+    </div>
+    <div id="historialDiv" style="margin-top:12px;"></div>`;
+  abrirModal('modalDetalle');
+}
+
+function verHistorial(id) {
+  document.getElementById('historialDiv').innerHTML = '<p style="color:#999;font-size:13px;margin-top:8px;">Cargando...</p>';
+  fetch(API_URL + 'obtener_historial.php?id_solicitud=' + id)
+  .then(r => r.json()).then(data => {
+    if (!data.historial || data.historial.length === 0) {
+      document.getElementById('historialDiv').innerHTML = '<p style="color:#999;font-size:13px;">Sin historial de cambios.</p>'; return;
     }
+    document.getElementById('historialDiv').innerHTML =
+      '<p style="font-size:14px;font-weight:700;margin:10px 0 8px;">Historial de Estados</p>' +
+      data.historial.map(h => `<div class="tl-item">
+        <div class="tl-dot"></div>
+        <div><div class="tl-estado">${badge(h.estado_cambio)}</div>
+          <div class="tl-meta">${h.nombre_usuario} · ${(h.fecha_accion||'').substring(0,16)}</div>
+          ${h.comentario ? `<div class="tl-com">"${h.comentario}"</div>` : ''}
+        </div></div>`).join('');
+  });
+}
 
-    // ===================== NAVEGACIÓN =====================
-    function abrirModulo(idModulo) {
-      document.querySelectorAll('.modulo').forEach(m => m.style.display = 'none');
-      let mod = document.getElementById(idModulo);
-      if(mod) mod.style.display = 'block';
+// ===================== CAMBIO ESTADO =====================
+function abrirCambioEstado(id, estadoActual, monto) {
+  document.getElementById('estadoTicketId').value = id;
+  document.getElementById('estadoTicketInfo').innerText = `Ticket: ${id} | Estado actual: ${estadoActual} | Monto: S/. ${parseFloat(monto).toFixed(2)}`;
+  document.getElementById('txtComentarioEstado').value = '';
 
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      let tabMap = {
-        'modulo-requerimiento': 'tab-requerimiento',
-        'modulo-historial':     'tab-historial',
-        'modulo-reportes':      'tab-reportes',
-        'modulo-sedes':         'tab-sedes',
-        'modulo-usuarios':      'tab-usuarios'
-      };
-      if(tabMap[idModulo]) document.getElementById(tabMap[idModulo]).classList.add('active');
+  let opts = [];
+  if (usuarioLogueado.rol === 'Admin')   opts = ['Aprobado','Rechazado','Depositado','Pagado','Cerrado'];
+  if (usuarioLogueado.rol === 'Pagador') opts = ['Depositado','Pagado'];
 
-      if(idModulo === 'modulo-historial') cargarTickets();
-      if(idModulo === 'modulo-reportes')  cargarReportes();
-      if(idModulo === 'modulo-usuarios')  cargarSedesEnSelectUsuario();
+  document.getElementById('selNuevoEstado').innerHTML = opts.map(o => `<option value="${o}">${o}</option>`).join('');
+  abrirModal('modalEstado');
+}
+function confirmarCambioEstado() {
+  let id  = document.getElementById('estadoTicketId').value;
+  let est = document.getElementById('selNuevoEstado').value;
+  let com = document.getElementById('txtComentarioEstado').value.trim();
+  if (est === 'Rechazado' && !com) return alert("Ingrese el motivo del rechazo.");
+  fetch(API_URL + 'cambiar_estado.php', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ id_solicitud:id, nuevo_estado:est, id_usuario:usuarioLogueado.id_usuario, rol:usuarioLogueado.rol, comentario:com }) })
+  .then(r => r.json()).then(res => {
+    alert(res.message);
+    if (res.success) { cerrarModal('modalEstado'); cargarTickets(); cargarNotificaciones(); }
+  });
+}
+
+// ===================== RENDICIÓN =====================
+function abrirRendicion(id, monto) {
+  document.getElementById('rendicionId').value    = id;
+  document.getElementById('rendicionMonto').value = monto;
+  document.getElementById('rendicionInfo').innerText = `Ticket: ${id} | Monto entregado: S/. ${parseFloat(monto).toFixed(2)}`;
+  document.getElementById('txtMontoGastado').value = '';
+  document.getElementById('txtObsRendicion').value = '';
+  document.getElementById('rendicionCalculo').style.display = 'none';
+  abrirModal('modalRendicion');
+}
+function calcularDevolucion() {
+  let entregado = parseFloat(document.getElementById('rendicionMonto').value) || 0;
+  let gastado   = parseFloat(document.getElementById('txtMontoGastado').value) || 0;
+  let devuelto  = Math.max(0, entregado - gastado);
+  let div = document.getElementById('rendicionCalculo');
+  div.style.display = 'block';
+  div.innerHTML = `<strong>Entregado:</strong> S/. ${entregado.toFixed(2)}<br>
+    <strong>Gastado:</strong> S/. ${gastado.toFixed(2)}<br>
+    <strong style="color:${devuelto>0?'var(--green)':'var(--black)'}">A devolver: S/. ${devuelto.toFixed(2)}</strong>`;
+}
+function confirmarRendicion() {
+  let id      = document.getElementById('rendicionId').value;
+  let gastado = parseFloat(document.getElementById('txtMontoGastado').value);
+  let obs     = document.getElementById('txtObsRendicion').value;
+  if (isNaN(gastado)) return alert("Ingrese el monto gastado.");
+  fetch(API_URL + 'registrar_rendicion.php', { method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ id_solicitud:id, monto_gastado:gastado, id_usuario:usuarioLogueado.id_usuario, observacion:obs }) })
+  .then(r => r.json()).then(res => {
+    alert(res.message + (res.monto_devuelto > 0 ? `\nDevolver: S/. ${parseFloat(res.monto_devuelto).toFixed(2)}` : ''));
+    if (res.success) { cerrarModal('modalRendicion'); cargarTickets(); }
+  });
+}
+
+// ===================== COMPROBANTES =====================
+function abrirComprobantes(id) {
+  document.getElementById('compTicketId').value = id;
+  document.getElementById('inputComp').value = '';
+  cargarListaComp(id);
+  abrirModal('modalComprobantes');
+}
+function cargarListaComp(id) {
+  fetch(API_URL + 'subir_comprobante.php?id_solicitud=' + id).then(r => r.json()).then(data => {
+    document.getElementById('listaComp').innerHTML = (!data.comprobantes || data.comprobantes.length === 0)
+      ? '<p style="color:#999;font-size:13px;">Sin comprobantes adjuntos.</p>'
+      : data.comprobantes.map(c => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:13px;">
+            <span>📄 ${c.nombre_archivo}</span>
+            <a href="${API_URL}${c.ruta_archivo}" target="_blank" class="btn btn-blue btn-sm">Ver</a>
+          </div>`).join('');
+  });
+}
+function subirComprobante() {
+  let id = document.getElementById('compTicketId').value;
+  let input = document.getElementById('inputComp');
+  if (!input.files[0]) return alert("Seleccione un archivo.");
+  let fd = new FormData();
+  fd.append('comprobante', input.files[0]);
+  fd.append('id_solicitud', id);
+  fd.append('id_usuario', usuarioLogueado.id_usuario);
+  fetch(API_URL + 'subir_comprobante.php', { method:'POST', body:fd })
+  .then(r => r.json()).then(res => { alert(res.message); if (res.success) { input.value=''; cargarListaComp(id); } });
+}
+
+// ===================== EXPORTAR EXCEL =====================
+function exportarExcel() {
+  let mes  = new Date().getMonth()+1;
+  let anio = new Date().getFullYear();
+  window.open(API_URL + `exportar_excel.php?mes=${mes}&anio=${anio}`, '_blank');
+}
+function exportarExcelReporte() {
+  let mes  = document.getElementById('selMesRep').value  || new Date().getMonth()+1;
+  let anio = document.getElementById('selAnioRep').value || new Date().getFullYear();
+  window.open(API_URL + `exportar_excel.php?mes=${mes}&anio=${anio}`, '_blank');
+}
+
+// ===================== REPORTES =====================
+function initFechas() {
+  let sm = document.getElementById('selMesRep'), sa = document.getElementById('selAnioRep');
+  if (sm.innerHTML) return;
+  sm.innerHTML = MESES.map((m,i) => `<option value="${i+1}" ${i+1==new Date().getMonth()+1?'selected':''}>${m}</option>`).join('');
+  let ay = new Date().getFullYear();
+  sa.innerHTML = [ay-1,ay,ay+1].map(y => `<option value="${y}" ${y==ay?'selected':''}>${y}</option>`).join('');
+}
+function cargarReportes() {
+  let mes  = document.getElementById('selMesRep').value  || new Date().getMonth()+1;
+  let anio = document.getElementById('selAnioRep').value || new Date().getFullYear();
+  fetch(API_URL + `obtener_reportes.php?mes=${mes}&anio=${anio}`).then(r => r.json()).then(res => {
+    if (!res.success) return;
+    let k = res.kpis || {};
+    document.getElementById('kpiGrid').innerHTML = `
+      <div class="kpi-card"><div class="kpi-num">${k.total_solicitudes||0}</div><div class="kpi-lbl">Total Req.</div></div>
+      <div class="kpi-card"><div class="kpi-num" style="font-size:18px;">S/.${parseFloat(k.total_monto||0).toFixed(0)}</div><div class="kpi-lbl">Monto</div></div>
+      <div class="kpi-card" style="border-top-color:#f57f17;"><div class="kpi-num" style="color:#f57f17;">${k.pendientes||0}</div><div class="kpi-lbl">Pendientes</div></div>
+      <div class="kpi-card" style="border-top-color:var(--green);"><div class="kpi-num" style="color:var(--green);">${k.aprobados||0}</div><div class="kpi-lbl">Aprobados</div></div>
+      <div class="kpi-card" style="border-top-color:var(--red);"><div class="kpi-num" style="color:var(--red);">${k.rechazados||0}</div><div class="kpi-lbl">Rechazados</div></div>
+      <div class="kpi-card" style="border-top-color:#455a64;"><div class="kpi-num" style="color:#455a64;">${k.cerrados||0}</div><div class="kpi-lbl">Cerrados</div></div>`;
+    document.getElementById('alertasDiv').innerHTML = res.alertas && res.alertas.length > 0
+      ? `<div class="alerta rojo"><strong>⚠️ ${res.alertas.length} ticket(s) esperan más de 48h:</strong>
+          ${res.alertas.map(a=>`<div style="margin-top:4px;">• ${a.id_solicitud} — ${a.solicitante} — ${a.horas_espera}h</div>`).join('')}</div>` : '';
+    graficar('chartEstado',   'doughnut', res.porEstado   ||[], 'etiqueta','cantidad');
+    graficar('chartConcepto', 'bar',      res.porConcepto ||[], 'etiqueta','total');
+    graficar('chartSede',     'bar',      res.porSede     ||[], 'etiqueta','total');
+    graficarLinea('chartTendencia', res.tendencia||[]);
+  });
+}
+function graficar(id, tipo, data, lk, vk) {
+  if (charts[id]) charts[id].destroy();
+  let ctx = document.getElementById(id); if (!ctx) return;
+  charts[id] = new Chart(ctx.getContext('2d'), { type:tipo,
+    data:{ labels:data.map(d=>d[lk]), datasets:[{ label:'S/.', data:data.map(d=>parseFloat(d[vk])||0),
+      backgroundColor:['#FFB81C','#1a1a1a','#2e7d32','#1565c0','#c62828','#6a1b9a','#e65100'], borderWidth:1 }] },
+    options:{ responsive:true, plugins:{ legend:{ display:tipo==='doughnut' } } } });
+}
+function graficarLinea(id, data) {
+  if (charts[id]) charts[id].destroy();
+  let ctx = document.getElementById(id); if (!ctx) return;
+  charts[id] = new Chart(ctx.getContext('2d'), { type:'line',
+    data:{ labels:data.map(d=>d.mes_label), datasets:[{ label:'S/.', data:data.map(d=>parseFloat(d.total)||0),
+      borderColor:'#FFB81C', backgroundColor:'rgba(255,184,28,0.1)', tension:0.3, fill:true }] },
+    options:{ responsive:true, plugins:{ legend:{ display:false } } } });
+}
+
+// ===================== PRESUPUESTOS =====================
+function initPresupuestoForm() {
+  fetch(API_URL + 'obtener_sedes.php').then(r=>r.json()).then(data => {
+    document.getElementById('selSedePres').innerHTML = data.map(s=>`<option value="${s.nombre_sede}">${s.nombre_sede}</option>`).join('');
+  });
+  document.getElementById('selMesPres').innerHTML = MESES.map((m,i)=>`<option value="${i+1}" ${i+1==new Date().getMonth()+1?'selected':''}>${m}</option>`).join('');
+  document.getElementById('txtAnioPres').value = new Date().getFullYear();
+}
+function guardarPresupuesto() {
+  let sede=document.getElementById('selSedePres').value, mes=document.getElementById('selMesPres').value;
+  let anio=document.getElementById('txtAnioPres').value, monto=document.getElementById('txtMontoPres').value;
+  if (!sede||!monto||monto<=0) return alert("Complete todos los campos.");
+  fetch(API_URL+'presupuestos.php',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({sede,mes,anio,monto,id_usuario:usuarioLogueado.id_usuario})})
+  .then(r=>r.json()).then(res=>{alert(res.message);if(res.success)cargarPresupuestos();});
+}
+function cargarPresupuestos() {
+  let mes=new Date().getMonth()+1, anio=new Date().getFullYear();
+  fetch(API_URL+`presupuestos.php?mes=${mes}&anio=${anio}`).then(r=>r.json()).then(data=>{
+    let div=document.getElementById('presupuestosLista');
+    if(!data.presupuestos||data.presupuestos.length===0){
+      div.innerHTML='<p style="color:#999;font-size:13px;padding:10px 0;">Sin presupuestos asignados para este mes.</p>';return;
     }
+    div.innerHTML=data.presupuestos.map(p=>{
+      let pct=Math.min(parseFloat(p.porcentaje_usado)||0,100);
+      let cls=pct<70?'prog-ok':pct<90?'prog-warn':'prog-danger';
+      let saldo=parseFloat(p.saldo);
+      return `<div class="card" style="margin-bottom:10px;padding:14px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <strong>${p.sede}</strong>
+          <span style="font-size:12px;color:#666;">S/. ${parseFloat(p.monto_gastado).toFixed(2)} / S/. ${parseFloat(p.monto_asignado).toFixed(2)}</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:4px;">
+          <span>${pct}% usado</span>
+          <span style="color:${saldo<0?'var(--red)':'var(--green)'};">Saldo: S/. ${saldo.toFixed(2)}</span>
+        </div></div>`;
+    }).join('');
+  });
+}
 
-    // ===================== MAESTROS (DROPDOWNS) =====================
-    function cargarMaestros() {
-      fetch(API_URL + 'obtener_maestros.php')
-      .then(r => r.json())
-      .then(res => {
-        if(res.success) {
-          maestros = res;
-          document.getElementById('selConcepto').innerHTML = res.conceptos.map(c =>
-            `<option value="${c.id_concepto}">${c.nombre_gasto}</option>`).join('');
-          document.getElementById('selAgencia').innerHTML =
-            `<option value="">-- Ninguna --</option>` +
-            res.agencias.map(a => `<option value="${a.id_agencia}">${a.nombre_agencia}</option>`).join('');
-        }
-      })
-      .catch(e => console.error("Error cargando maestros", e));
+// ===================== SEDES =====================
+function cargarTablaSedes() {
+  fetch(API_URL + 'gestionar_sedes.php?accion=listar').then(r=>r.json()).then(data=>{
+    let tbody = document.querySelector('#tablaSedesAdmin tbody');
+    tbody.innerHTML = (!data.sedes||data.sedes.length===0)
+      ? '<tr><td colspan="4" style="text-align:center;color:#999;padding:18px;">Sin sedes registradas</td></tr>'
+      : data.sedes.map(s=>`<tr>
+          <td>${s.id_sede}</td><td>${s.nombre_sede}</td>
+          <td>${badge(s.estado)}</td>
+          <td>
+            <button class="btn btn-blue btn-sm" onclick="abrirEditSede(${s.id_sede},'${s.nombre_sede}','${s.estado}')">✏️ Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="eliminarSede(${s.id_sede},'${s.nombre_sede}')">🗑️</button>
+          </td></tr>`).join('');
+  });
+}
+function crearSede() {
+  let nombre = document.getElementById('txtNuevaSede').value.trim();
+  if (!nombre) return alert("Ingrese el nombre de la sede.");
+  fetch(API_URL+'gestionar_sedes.php',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion:'crear',nombre_sede:nombre})})
+  .then(r=>r.json()).then(res=>{alert(res.message);if(res.success){document.getElementById('txtNuevaSede').value='';cargarTablaSedes();cargarSedesEnFormulario();}});
+}
+function abrirEditSede(id, nombre, estado) {
+  document.getElementById('editSedeId').value    = id;
+  document.getElementById('editSedeNombre').value = nombre;
+  document.getElementById('editSedeEstado').value = estado;
+  abrirModal('modalEditSede');
+}
+function guardarEditSede() {
+  let id     = document.getElementById('editSedeId').value;
+  let nombre = document.getElementById('editSedeNombre').value.trim();
+  let estado = document.getElementById('editSedeEstado').value;
+  if (!nombre) return alert("Ingrese el nombre.");
+  fetch(API_URL+'gestionar_sedes.php',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion:'editar',id_sede:id,nombre_sede:nombre,estado})})
+  .then(r=>r.json()).then(res=>{alert(res.message);if(res.success){cerrarModal('modalEditSede');cargarTablaSedes();}});
+}
+function eliminarSede(id, nombre) {
+  if (!confirm(`¿Desactivar la sede "${nombre}"?`)) return;
+  fetch(API_URL+'gestionar_sedes.php',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion:'eliminar',id_sede:id})})
+  .then(r=>r.json()).then(res=>{alert(res.message);cargarTablaSedes();});
+}
+
+// ===================== USUARIOS =====================
+function switchUserTab(tab) {
+  document.getElementById('userTab-nuevo').style.display   = tab==='nuevo'   ? 'block' : 'none';
+  document.getElementById('userTab-listado').style.display = tab==='listado' ? 'block' : 'none';
+  document.querySelectorAll('#modulo-usuarios .inner-tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0&&tab==='nuevo')||(i===1&&tab==='listado'));
+  });
+  if (tab === 'listado') cargarTablaUsuarios();
+}
+function cargarTablaUsuarios() {
+  fetch(API_URL + 'gestionar_usuarios.php?accion=listar').then(r=>r.json()).then(data=>{
+    let tbody = document.querySelector('#tablaUsuariosAdmin tbody');
+    tbody.innerHTML = (!data.usuarios||data.usuarios.length===0)
+      ? '<tr><td colspan="7" style="text-align:center;color:#999;padding:18px;">Sin usuarios</td></tr>'
+      : data.usuarios.map(u=>`<tr>
+          <td>${u.id_usuario}</td><td>${u.nombre_completo}</td><td style="font-size:12px;">${u.correo_electronico}</td>
+          <td><span class="badge badge-${u.rol==='Admin'?'Aprobado':u.rol==='Pagador'?'Depositado':'Pendiente'}">${u.rol}</span></td>
+          <td>${u.sede_operacion||'—'}</td><td>${badge(u.estado)}</td>
+          <td>
+            <button class="btn btn-blue btn-sm" onclick='abrirEditUsuario(${JSON.stringify(u)})'>✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="eliminarUsuario('${u.id_usuario}','${u.nombre_completo}')">🗑️</button>
+          </td></tr>`).join('');
+  });
+}
+function registrarUsuario() {
+  let nombre=document.getElementById('txtNombreUsr').value.trim();
+  let correo=document.getElementById('txtCorreoUsr').value.trim();
+  let pass=document.getElementById('txtPassUsr').value;
+  let rol=document.getElementById('selRolUsr').value;
+  let sede=document.getElementById('selSedeUsr').value;
+  if(!nombre||!correo||!pass||!sede) return alert("Complete todos los campos.");
+  if(pass.length<6) return alert("Contraseña mínimo 6 caracteres.");
+  fetch(API_URL+'registrar_usuario.php',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({nombre,correo,password:pass,rol,sede})})
+  .then(r=>r.json()).then(res=>{
+    alert(res.message);
+    if(res.success){document.getElementById('txtNombreUsr').value='';document.getElementById('txtCorreoUsr').value='';document.getElementById('txtPassUsr').value='';}
+  });
+}
+function abrirEditUsuario(u) {
+  cargarSedesSelectUsr();
+  document.getElementById('editUsrId').value      = u.id_usuario;
+  document.getElementById('editUsrNombre').value  = u.nombre_completo;
+  document.getElementById('editUsrCorreo').value  = u.correo_electronico;
+  document.getElementById('editUsrPass').value    = '';
+  document.getElementById('editUsrRol').value     = u.rol;
+  document.getElementById('editUsrEstado').value  = u.estado;
+  setTimeout(() => { document.getElementById('editUsrSede').value = u.sede_operacion||''; }, 400);
+  abrirModal('modalEditUsuario');
+}
+function guardarEditUsuario() {
+  let id=document.getElementById('editUsrId').value;
+  let payload={accion:'editar',id_usuario:id,
+    nombre:document.getElementById('editUsrNombre').value.trim(),
+    correo:document.getElementById('editUsrCorreo').value.trim(),
+    rol:document.getElementById('editUsrRol').value,
+    sede:document.getElementById('editUsrSede').value,
+    estado:document.getElementById('editUsrEstado').value};
+  let pass=document.getElementById('editUsrPass').value;
+  if(pass) payload.password = pass;
+  fetch(API_URL+'gestionar_usuarios.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  .then(r=>r.json()).then(res=>{alert(res.message);if(res.success){cerrarModal('modalEditUsuario');cargarTablaUsuarios();}});
+}
+function eliminarUsuario(id, nombre) {
+  if(!confirm(`¿Desactivar al usuario "${nombre}"?`)) return;
+  fetch(API_URL+'gestionar_usuarios.php',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion:'eliminar',id_usuario:id})})
+  .then(r=>r.json()).then(res=>{alert(res.message);cargarTablaUsuarios();});
+}
+
+// ===================== MAESTROS (Conceptos / Agencias) =====================
+function switchMaestroTab(tab) {
+  document.getElementById('maestroTab-conceptos').style.display = tab==='conceptos' ? 'block' : 'none';
+  document.getElementById('maestroTab-agencias').style.display  = tab==='agencias'  ? 'block' : 'none';
+  document.querySelectorAll('#modulo-maestros .inner-tab').forEach((t,i)=>{
+    t.classList.toggle('active',(i===0&&tab==='conceptos')||(i===1&&tab==='agencias'));
+  });
+  if(tab==='conceptos') cargarTablaMaestro('conceptos_gasto');
+  if(tab==='agencias')  cargarTablaMaestro('agencias_terceros');
+}
+function cargarTablaMaestro(tabla) {
+  fetch(API_URL+`gestionar_maestros.php?accion=listar&tabla=${tabla}`).then(r=>r.json()).then(data=>{
+    let esConcepto = tabla === 'conceptos_gasto';
+    let tbId = esConcepto ? 'tablaConceptos' : 'tablaAgencias';
+    let tbody = document.querySelector(`#${tbId} tbody`);
+    tbody.innerHTML = (!data.items||data.items.length===0)
+      ? `<tr><td colspan="${esConcepto?4:5}" style="text-align:center;color:#999;padding:18px;">Sin registros</td></tr>`
+      : data.items.map(it=>`<tr>
+          <td>${it.id}</td><td>${it.nombre}</td>
+          ${!esConcepto?`<td>${it.zona_cobertura||'—'}</td>`:''}
+          <td>${badge(it.estado)}</td>
+          <td>
+            <button class="btn btn-blue btn-sm" onclick="abrirEditMaestro(${it.id},'${it.nombre}','${it.estado}','${tabla}','${it.zona_cobertura||''}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="eliminarMaestro(${it.id},'${tabla}')">🗑️</button>
+          </td></tr>`).join('');
+  });
+}
+function crearMaestro(tabla) {
+  let nombre = tabla==='conceptos_gasto' ? document.getElementById('txtNuevoConcepto').value.trim() : document.getElementById('txtNuevoAgencia').value.trim();
+  let zona   = tabla==='agencias_terceros' ? document.getElementById('txtNuevoZona').value.trim() : '';
+  if(!nombre) return alert("Ingrese el nombre.");
+  fetch(API_URL+'gestionar_maestros.php',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion:'crear',tabla,nombre,zona})})
+  .then(r=>r.json()).then(res=>{
+    alert(res.message);
+    if(res.success){
+      if(tabla==='conceptos_gasto') document.getElementById('txtNuevoConcepto').value='';
+      else { document.getElementById('txtNuevoAgencia').value=''; document.getElementById('txtNuevoZona').value=''; }
+      cargarTablaMaestro(tabla);
+      cargarMaestros(); // Refresca los dropdowns del formulario
     }
+  });
+}
+function abrirEditMaestro(id, nombre, estado, tabla, zona) {
+  document.getElementById('editMaestroId').value     = id;
+  document.getElementById('editMaestroTabla').value  = tabla;
+  document.getElementById('editMaestroNombre').value = nombre;
+  document.getElementById('editMaestroEstado').value = estado;
+  document.getElementById('editMaestroTitulo').innerText = tabla==='conceptos_gasto' ? 'Editar Concepto' : 'Editar Agencia';
+  let zonaDiv = document.getElementById('editMaestroZonaDiv');
+  zonaDiv.style.display = tabla==='agencias_terceros' ? 'block' : 'none';
+  document.getElementById('editMaestroZona').value = zona;
+  abrirModal('modalEditMaestro');
+}
+function guardarEditMaestro() {
+  let id    = document.getElementById('editMaestroId').value;
+  let tabla = document.getElementById('editMaestroTabla').value;
+  let payload = { accion:'editar', tabla, id,
+    nombre: document.getElementById('editMaestroNombre').value.trim(),
+    estado: document.getElementById('editMaestroEstado').value,
+    zona:   document.getElementById('editMaestroZona').value.trim() };
+  fetch(API_URL+'gestionar_maestros.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+  .then(r=>r.json()).then(res=>{alert(res.message);if(res.success){cerrarModal('modalEditMaestro');cargarTablaMaestro(tabla);cargarMaestros();}});
+}
+function eliminarMaestro(id, tabla) {
+  if(!confirm("¿Desactivar este registro?")) return;
+  fetch(API_URL+'gestionar_maestros.php',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({accion:'eliminar',tabla,id})})
+  .then(r=>r.json()).then(res=>{alert(res.message);cargarTablaMaestro(tabla);cargarMaestros();});
+}
 
-    // ===================== SEDES =====================
-    function cargarSedesEnFormulario() {
-      let combo = document.getElementById('selSedeRequerimiento');
-      if(!combo) return;
-      fetch(API_URL + 'obtener_sedes.php')
-      .then(r => r.json())
-      .then(data => {
-        combo.innerHTML = '<option value="">-- Seleccione un lugar --</option>';
-        data.forEach(s => combo.innerHTML += `<option value="${s.nombre_sede}">${s.nombre_sede}</option>`);
-      })
-      .catch(e => console.error("Error obteniendo sedes", e));
-    }
-
-    function cargarSedesEnSelectUsuario() {
-      let combo = document.getElementById('selSedeUsuario');
-      if(!combo) return;
-      fetch(API_URL + 'obtener_sedes.php')
-      .then(r => r.json())
-      .then(data => {
-        combo.innerHTML = '<option value="">-- Seleccione sede --</option>';
-        data.forEach(s => combo.innerHTML += `<option value="${s.nombre_sede}">${s.nombre_sede}</option>`);
-      });
-    }
-
-    // ===================== USUARIOS POR SEDE =====================
-    function cargarUsuariosPorSede(sede) {
-      let combo = document.getElementById('selUsuarioRequerimiento');
-      if(!combo) return;
-      if(!sede) { combo.innerHTML = '<option value="">-- Seleccione una sede primero --</option>'; return; }
-
-      combo.innerHTML = '<option value="">Cargando personal...</option>';
-      fetch(API_URL + 'obtener_usuarios_sede.php?sede=' + encodeURIComponent(sede))
-      .then(r => r.json())
-      .then(data => {
-        if(data.length === 0) {
-          combo.innerHTML = '<option value="">⚠️ No hay usuarios en esta sede</option>';
-          return;
-        }
-        combo.innerHTML = '<option value="">-- Seleccione quién solicita --</option>';
-        data.forEach(u => combo.innerHTML += `<option value="${u.id_usuario}">${u.nombre_completo}</option>`);
-      })
-      .catch(() => combo.innerHTML = '<option value="">Error al conectar</option>');
-    }
-
-    // ===================== TABLA TEMPORAL DE ÍTEMS =====================
-    function agregarItemTabla() {
-      let idConcepto = document.getElementById('selConcepto').value;
-      let idAgencia  = document.getElementById('selAgencia').value;
-      let importe    = parseFloat(document.getElementById('txtImporte').value);
-
-      if(!idConcepto) return alert("Seleccione un concepto de gasto.");
-      if(!importe || importe <= 0) return alert("Ingrese un importe válido.");
-
-      let selC = document.getElementById('selConcepto');
-      let selA = document.getElementById('selAgencia');
-      let textConcepto = selC.options[selC.selectedIndex].text;
-      let textAgencia  = idAgencia ? selA.options[selA.selectedIndex].text : "N/A";
-
-      listaItemsTemporal.push({
-        id_concepto:    idConcepto,
-        nombre_concepto: textConcepto,
-        id_agencia:     idAgencia || "N/A",
-        nombre_agencia: textAgencia,
-        importe:        importe
-      });
-
-      document.getElementById('txtImporte').value = '';
-      renderizarTablaTemporal();
-    }
-
-    function removerItemTemporal(index) {
-      listaItemsTemporal.splice(index, 1);
-      renderizarTablaTemporal();
-    }
-
-    function renderizarTablaTemporal() {
-      let tbody = document.querySelector('#tablaTemporal tbody');
-      tbody.innerHTML = '';
-      let total = 0;
-      listaItemsTemporal.forEach((item, i) => {
-        total += item.importe;
-        tbody.innerHTML += `
-          <tr>
-            <td>${item.nombre_concepto}</td>
-            <td>${item.nombre_agencia}</td>
-            <td>S/. ${item.importe.toFixed(2)}</td>
-            <td><button class="btn-danger" onclick="removerItemTemporal(${i})">❌</button></td>
-          </tr>`;
-      });
-      document.getElementById('lblTotalTicket').innerText = total.toFixed(2);
-    }
-
-    // ===================== EMITIR TICKET =====================
-    function emitirTicket() {
-      let sede       = document.getElementById('selSedeRequerimiento').value;
-      let solicitante = document.getElementById('selUsuarioRequerimiento').value;
-      let glosa      = document.getElementById('txtDetalleGlosa').value.trim();
-      let total      = parseFloat(document.getElementById('lblTotalTicket').innerText);
-
-      if(!sede)        return alert("Seleccione una sede.");
-      if(!solicitante) return alert("Seleccione un solicitante.");
-      if(!glosa)       return alert("Ingrese el motivo del gasto.");
-      if(listaItemsTemporal.length === 0) return alert("Añada al menos un concepto al ticket.");
-
-      let payload = {
-        id_usuario:  solicitante,
-        sede:        sede,
-        detalles:    glosa,
-        monto_total: total,
-        items:       listaItemsTemporal
-      };
-
-      fetch(API_URL + 'registrar_solicitud.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }, // FIX: header agregado
-        body: JSON.stringify(payload)
-      })
-      .then(r => r.json())
-      .then(res => {
-        alert(res.message);
-        if(res.success) {
-          listaItemsTemporal = [];
-          document.getElementById('txtDetalleGlosa').value = '';
-          document.getElementById('selSedeRequerimiento').value = '';
-          document.getElementById('selUsuarioRequerimiento').innerHTML = '<option value="">-- Seleccione una sede primero --</option>';
-          renderizarTablaTemporal();
-          abrirModulo('modulo-historial');
-        }
-      })
-      .catch(() => alert("Error al conectar con el servidor."));
-    }
-
-    // ===================== HISTORIAL DE TICKETS =====================
-    function cargarTickets() {
-      // FIX: antes iteraba sobre data directamente, ahora usa data.tickets
-      fetch(API_URL + 'obtener_tickets.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rol: usuarioLogueado.rol, id_usuario: usuarioLogueado.id_usuario })
-      })
-      .then(r => r.json())
-      .then(data => {
-        let tbody = document.querySelector('#tablaTickets tbody');
-        tbody.innerHTML = '';
-        if(!data.success || data.tickets.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">No hay requerimientos registrados.</td></tr>';
-          return;
-        }
-        data.tickets.forEach(t => {
-          tbody.innerHTML += `
-            <tr>
-              <td><strong>${t.id_solicitud}</strong></td>
-              <td>${t.fecha_hora}</td>
-              <td>${t.solicitante}</td>
-              <td>${t.sede}</td>
-              <td>S/. ${parseFloat(t.monto_total).toFixed(2)}</td>
-              <td><span style="padding:4px 8px; border-radius:12px; font-weight:bold; background:#fff8e1; color:#f57f17;">${t.estado_actual}</span></td>
-              <td><button class="btn-primary" style="padding:6px; font-size:12px; width:auto;" onclick="verDetalleTicket('${t.id_solicitud}')">Ver</button></td>
-            </tr>`;
-        });
-      })
-      .catch(() => alert("Error cargando la bandeja."));
-    }
-
-    function verDetalleTicket(id) {
-      let ticket = null;
-      // Buscar en los datos ya cargados no es posible sin estado global, mostramos info básica
-      alert("Ticket: " + id + "\nPara ver el detalle completo consulte en la bandeja.");
-    }
-
-    // ===================== REGISTRAR USUARIO =====================
-    function registrarUsuario() {
-      let nombre = document.getElementById('txtNombreUsuario').value.trim();
-      let correo = document.getElementById('txtCorreoUsuario').value.trim();
-      let pass   = document.getElementById('txtPassUsuario').value;
-      let rol    = document.getElementById('selRolUsuario').value;
-      let sede   = document.getElementById('selSedeUsuario').value;
-
-      if(!nombre || !correo || !pass || !sede) return alert("Complete todos los campos.");
-      if(pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
-
-      fetch(API_URL + 'registrar_usuario.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, correo, password: pass, rol, sede })
-      })
-      .then(r => r.json())
-      .then(res => {
-        alert(res.message);
-        if(res.success) {
-          document.getElementById('txtNombreUsuario').value = '';
-          document.getElementById('txtCorreoUsuario').value = '';
-          document.getElementById('txtPassUsuario').value   = '';
-        }
-      })
-      .catch(() => alert("Error al registrar el usuario."));
-    }
-
-    // ===================== CREAR SEDE =====================
-    function crearSede() {
-      let nombre = document.getElementById('txtNuevaSedeAdmin').value.trim();
-      if(!nombre) return alert("Ingrese el nombre de la sede.");
-
-      fetch(API_URL + 'registrar_sede.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre_sede: nombre })
-      })
-      .then(r => r.json())
-      .then(res => {
-        alert(res.message);
-        if(res.success) {
-          document.getElementById('txtNuevaSedeAdmin').value = '';
-          cargarSedesEnFormulario();
-        }
-      })
-      .catch(() => alert("Error al crear la sede."));
-    }
-
-    // ===================== REPORTES =====================
-    function cargarReportes() {
-      fetch(API_URL + 'obtener_reportes.php')
-      .then(r => r.json())
-      .then(res => {
-        if(res.success) {
-          dibujarGrafico('chartEstado',   'doughnut', res.porEstado,   chartEstadoInst,   c => chartEstadoInst = c);
-          dibujarGrafico('chartConcepto', 'bar',      res.porConcepto, chartConceptoInst, c => chartConceptoInst = c);
-        }
-      })
-      .catch(e => console.error("Error cargando gráficos", e));
-    }
-
-    function dibujarGrafico(idCanvas, tipo, datos, instanciaPrevia, setInstancia) {
-      if(instanciaPrevia) instanciaPrevia.destroy();
-      let ctx = document.getElementById(idCanvas).getContext('2d');
-      let nuevo = new Chart(ctx, {
-        type: tipo,
-        data: {
-          labels: datos.map(d => d.etiqueta || 'Sin Asignar'),
-          datasets: [{
-            label: 'Total (S/.)',
-            data: datos.map(d => parseFloat(d.total)),
-            backgroundColor: ['#FFB81C','#1a1a1a','#d32f2f','#1565c0','#4caf50'],
-            borderWidth: 1
-          }]
-        },
-        options: { responsive: true }
-      });
-      setInstancia(nuevo);
-    }
-  </script>
+// ===================== MODALES =====================
+function abrirModal(id)  { document.getElementById(id).classList.add('open'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+</script>
 </body>
 </html>
