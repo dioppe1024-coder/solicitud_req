@@ -2,216 +2,380 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sistema de Logística CAT</title>
   <link rel="stylesheet" href="./styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root { --cat-yellow: #FFB81C; --cat-black: #222222; --cat-gray: #f4f5f7; --cat-white: #ffffff; }
-    body { font-family: 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%); margin: 0; min-height: 100vh; color: var(--cat-black); }
+    :root { 
+      --cat-yellow: #FFB81C; 
+      --cat-black: #1a1a1a; 
+      --cat-gray: #f4f5f7; 
+      --cat-white: #ffffff; 
+    }
     
-    /* Globales */
-    .card { background: var(--cat-white); border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9rem; }
-    th { background: var(--cat-gray); text-align: left; padding: 12px; border-bottom: 2px solid #ccc; }
-    td { padding: 12px; border-bottom: 1px solid #eee; }
-    input, select { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
-    button.btn-primary { background: var(--cat-black); color: var(--cat-yellow); border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s;}
-    button.btn-primary:hover { background: #000; }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
 
-    /* Layout Principal */
-    #app-view { display: none; }
-    .topbar { background: var(--cat-black); color: var(--cat-white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid var(--cat-yellow); position: sticky; top: 0; z-index: 100;}
-    .nav-tabs { display: flex; gap: 10px; margin: 20px auto; max-width: 1200px; padding: 0 20px; overflow-x: auto; }
-    .tab { background: var(--cat-white); border: 1px solid #ddd; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; white-space: nowrap; }
-    .tab.active, .tab:hover { background: var(--cat-yellow); color: var(--cat-black); border-color: var(--cat-yellow); }
-    .main-container { padding: 0 20px; max-width: 1200px; margin: 0 auto; }
+    body { 
+      background: #f5f5f7; 
+      margin: 0; 
+      min-height: 100vh; 
+      color: var(--cat-black);
+      padding-bottom: 75px; /* Espacio para que la barra inferior no tape nada */
+    }
+    
+    /* Contenedor Principal */
+    .main-container {
+      padding: 15px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Tarjetas y Contenedores */
+    .card { 
+      background: var(--cat-white); 
+      border-radius: 12px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+      padding: 20px; 
+      margin-bottom: 20px; 
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    input, select, textarea { 
+      width: 100%;
+      padding: 12px; 
+      border: 1px solid #ccc; 
+      border-radius: 8px; 
+      font-size: 16px; /* Evita zoom automático molesto en iOS */
+      background-color: #fff;
+      margin-bottom: 12px;
+    }
+
+    /* Botones Estilo Celular */
+    .btn-primary { 
+      background: var(--cat-yellow); 
+      color: var(--cat-black); 
+      font-weight: bold; 
+      border: none; 
+      padding: 14px 20px; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      width: 100%;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover { background: #e5a517; }
+
+    .btn-danger { 
+      background: #d32f2f; 
+      color: #fff; 
+      border: none; 
+      padding: 8px 12px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+    }
+
+    /* Tablas Responsivas */
+    .table-responsive { 
+      width: 100%; 
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: #eee; text-align: left; padding: 12px; border-bottom: 2px solid #ccc; font-weight: 600; }
+    td { padding: 12px; border-bottom: 1px solid #eee; background: #fff; }
+
+    /* Barra de Navegación Móvil Inferior */
+    .nav-tabs { 
+      display: flex; 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      background: #1a1a1a; 
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.1); 
+      z-index: 999; 
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+    .tab { 
+      flex: 1; 
+      text-align: center; 
+      padding: 15px 10px; 
+      color: #aaa; 
+      font-size: 12px; 
+      font-weight: 500; 
+      cursor: pointer; 
+      min-width: 90px;
+      transition: all 0.2s;
+    }
+    .tab.active { 
+      color: var(--cat-yellow); 
+      border-top: 3px solid var(--cat-yellow); 
+      background: rgba(255, 184, 28, 0.05); 
+    }
+
     .modulo { display: none; }
-    .modulo.active { display: block; }
-
-    /* Login */
-    #login-view { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .login-box { width: 100%; max-width: 400px; }
+    
+    /* Login Centrado */
+    .login-container { max-width: 400px; margin: 80px auto padding: 20px; }
   </style>
 </head>
 <body>
 
-  <div id="login-view">
-    <div class="card login-box">
-      <h2 style="border-bottom: 2px solid var(--cat-yellow); padding-bottom:10px; text-align:center;">Acceso al Sistema</h2>
-      <div style="margin-bottom: 15px;"><label>Correo</label><input type="email" id="txtCorreo" required></div>
-      <div style="margin-bottom: 20px;"><label>Contraseña</label><input type="password" id="txtPassword" required></div>
-      <button class="btn-primary" onclick="login()" id="btnLogin" style="width: 100%;">Ingresar</button>
-      <div id="msgLogin" style="color:red; margin-top:10px; text-align:center;"></div>
+  <div id="view-login" class="main-container login-container">
+    <div class="card" style="text-align: center;">
+      <h2 style="margin-bottom: 20px;">🔑 Acceso al Sistema</h2>
+      <div style="text-align: left;">
+        <label>Correo Electrónico</label>
+        <input type="email" id="txtCorreo" placeholder="ejemplo@cat.com">
+        
+        <label>Contraseña</label>
+        <input type="password" id="txtPassword" placeholder="••••••••">
+        
+        <button class="btn-primary" onclick="ejecutarLogin()" style="margin-top: 10px;">Ingresar de Forma Segura</button>
+      </div>
     </div>
   </div>
 
-  <div id="app-view">
-    <div class="topbar">
-      <h3>Logística | CAT</h3>
-      <div><span id="lblUser"></span> | <button onclick="logout()" style="background:transparent; color:var(--cat-yellow); border:1px solid var(--cat-yellow); padding:5px 10px; border-radius:4px; cursor:pointer;">Salir</button></div>
-    </div>
-
-    <div class="nav-tabs" id="menuTabs">
-      <div class="tab" onclick="abrirModulo('modulo-solicitudes')" id="tab-solicitudes">📝 Nuevo Requerimiento</div>
-      <div class="tab" onclick="abrirModulo('modulo-monitor')" id="tab-monitor">📊 Mis Solicitudes</div>
-      <div class="tab" onclick="abrirModulo('modulo-auditoria')" id="tab-auditoria" style="display:none;">🛡️ Auditoría</div>
-      <div class="tab" onclick="abrirModulo('modulo-caja')" id="tab-caja" style="display:none;">💰 Tesorería (Caja)</div>
+  <div id="view-app" style="display: none;">
+    
+    <div style="background: #1a1a1a; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-weight: bold; color: var(--cat-yellow);">🚜 LOGÍSTICA CAT</span>
+      <span id="lblUsuarioNav" style="font-size: 14px; background: #333; padding: 5px 10px; border-radius: 20px;">Usuario</span>
     </div>
 
     <div class="main-container">
       
       <div id="modulo-requerimiento" class="modulo card">
-  <h2>Nuevo Requerimiento de Dinero</h2>
-  
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-    <div>
-      <label>1. Seleccione Sede / Departamento</label>
-      <select id="selSedeRequerimiento" onchange="cargarUsuariosPorSede(this.value)">
-        <option value="">-- Seleccione un lugar --</option>
-        </select>
-    </div>
-    
-    <div>
-      <label>2. Solicitante Autorizado</label>
-      <select id="selUsuarioRequerimiento">
-        <option value="">-- Seleccione una sede primero --</option>
-      </select>
-    </div>
-  </div>
+        <h2>Nuevo Requerimiento de Dinero</h2>
+        <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Complete la sede para desplegar el personal autorizado.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px;">
+          <div>
+            <label>1. Seleccione Sede / Departamento</label>
+            <select id="selSedeRequerimiento" onchange="cargarUsuariosPorSede(this.value)">
+              <option value="">-- Seleccione un lugar --</option>
+            </select>
+          </div>
+          <div>
+            <label>2. Solicitante Autorizado</label>
+            <select id="selUsuarioRequerimiento">
+              <option value="">-- Seleccione una sede primero --</option>
+            </select>
+          </div>
+        </div>
 
-  <div>
-    <label>3. Detalle / Motivo del Gasto General</label>
-    <textarea id="txtDetalleGlosa" rows="2" placeholder="Ej. Gastos operativos correspondientes a la supervisión de rutas de la tercera semana..."></textarea>
-  </div>
+        <div>
+          <label>3. Detalle / Motivo del Gasto General</label>
+          <textarea id="txtDetalleGlosa" rows="2" placeholder="Ej. Gastos correspondientes a la compra de repuestos y viáticos de ruta..."></textarea>
+        </div>
 
-  <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
 
-  <h3>Agregar Conceptos al Ticket</h3>
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-    <div>
-      <label>Concepto de Gasto</label>
-      <select id="selConcepto"></select>
-    </div>
-    <div>
-      <label>Agencia / Tercero</label>
-      <select id="selAgencia"></select>
-    </div>
-    <div>
-      <label>Importe (S/.)</label>
-      <input type="number" id="txtImporte" step="0.01" placeholder="0.00">
-    </div>
-    <div style="display: flex; align-items: flex-end;">
-      <button class="btn-primary" onclick="agregarItemTabla()" style="background:#222; color:#fff;">+ Añadir Línea</button>
-    </div>
-  </div>
+        <h3>Agregar Conceptos al Ticket</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+          <div>
+            <label>Concepto de Gasto</label>
+            <select id="selConcepto"></select>
+          </div>
+          <div>
+            <label>Agencia / Tercero</label>
+            <select id="selAgencia"></select>
+          </div>
+          <div>
+            <label>Importe (S/.)</label>
+            <input type="number" id="txtImporte" step="0.01" placeholder="0.00">
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button class="btn-primary" onclick="agregarItemTabla()" style="background:#222; color:#fff;">+ Añadir Línea</button>
+          </div>
+        </div>
 
-  <div class="table-responsive">
-    <table id="tablaTemporal">
-      <thead>
-        <tr style="background:#eee;">
-          <th>Concepto</th>
-          <th>Agencia</th>
-          <th>Importe</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+        <div class="table-responsive">
+          <table id="tablaTemporal">
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Agencia</th>
+                <th>Importe</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
-  <div style="text-align: right; margin-top: 15px; font-size: 18px; font-weight: bold;">
-    Total a Solicitar: S/. <span id="lblTotalTicket">0.00</span>
-  </div>
+        <div style="text-align: right; margin-top: 15px; font-size: 18px; font-weight: bold;">
+          Total a Solicitar: S/. <span id="lblTotalTicket">0.00</span>
+        </div>
 
-  <button class="btn-primary" onclick="emitirTicketCompleto()" style="margin-top:20px;">🚀 Emitir Ticket de Requerimiento</button>
-</div>
-
-      <div id="modulo-monitor" class="modulo card">
-        <h2>Monitor Operativo</h2>
-        <div id="listaMonitor">Cargando...</div>
+        <button class="btn-primary" onclick="emitirTicket()" style="margin-top:20px;">🚀 Emitir Ticket de Requerimiento</button>
       </div>
 
-      <div id="modulo-auditoria" class="modulo card">
-        <h2>Bandeja de Jefatura</h2>
-        <div id="listaAuditoria">Cargando...</div>
+      <div id="modulo-historial" class="modulo card">
+        <h2>Bandeja de Requerimientos</h2>
+        <div class="table-responsive">
+          <table id="tablaTickets">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Fecha/Hora</th>
+                <th>Solicitante</th>
+                <th>Sede</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
 
-      <div id="modulo-caja" class="modulo card">
-        <h2>Bandeja de Pagos</h2>
-        <div id="listaCaja">Cargando...</div>
+      <div id="modulo-usuarios" class="modulo card">
+        <h2>Gestión de Usuarios</h2>
+        <p style="color:#666; margin-bottom:15px;">Módulo exclusivo de administración.</p>
+        </div>
+
+      <div id="modulo-reportes" class="modulo card">
+        <h2>Dashboard Gerencial</h2>
+        <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:15px;">
+          <div style="flex:1; min-width:300px; padding:15px; border:1px solid #eee; border-radius:8px;">
+            <h3 style="text-align:center; margin-bottom:10px;">Distribución por Estado (S/.)</h3>
+            <canvas id="chartEstado"></canvas>
+          </div>
+          <div style="flex:1; min-width:300px; padding:15px; border:1px solid #eee; border-radius:8px;">
+            <h3 style="text-align:center; margin-bottom:10px;">Gasto por Concepto (S/.)</h3>
+            <canvas id="chartConcepto"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="modulo-sedes" class="modulo card">
+        <h2>Administración de Sedes</h2>
+        <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px; align-items:flex-end;">
+          <div style="flex:1; min-width:250px;">
+              <label>Nombre de la Nueva Sede</label>
+              <input type="text" id="txtNuevaSedeAdmin" placeholder="Ej. Sucursal Piura">
+          </div>
+          <div>
+              <button class="btn-primary" onclick="crearSede()" style="width:auto; padding:12px 25px;">Guardar Sede</button>
+          </div>
+        </div>
       </div>
 
     </div>
+
+    <div class="nav-tabs">
+      <div class="tab" onclick="abrirModulo('modulo-requerimiento')" id="tab-requerimiento">📝 Nuevo Req.</div>
+      <div class="tab" onclick="abrirModulo('modulo-historial')" id="tab-historial">📂 Bandeja</div>
+      <div class="tab" onclick="abrirModulo('modulo-reportes')" id="tab-reportes" style="display:none;">📈 Reportes</div>
+      <div class="tab" onclick="abrirModulo('modulo-sedes')" id="tab-sedes" style="display:none;">🏢 Sedes</div>
+      <div class="tab" onclick="abrirModulo('modulo-usuarios')" id="tab-usuarios" style="display:none;">👥 Usuarios</div>
+    </div>
+
   </div>
 
   <script>
-    // 🚨 REEMPLAZA ESTO CON LA RUTA REAL DE TU API EN cPANEL 🚨
-    const API_URL = 'https://www.magsa.com.pe/api/';
-    
-    let carrito = [];
+    const API_URL = "https://magsacom.com/api/"; // Cambia esta ruta por la real de tu API si varía
+    let usuarioLogueado = null;
     let maestros = { conceptos: [], agencias: [] };
+    let listaItemsTemporal = [];
+    
+    let chartEstadoInst = null;
+    let chartConceptoInst = null;
 
-    // --- ARRANQUE ---
-    window.onload = () => {
-      if(sessionStorage.getItem('id_usuario')) {
-        iniciarApp();
-      }
-    };
+    // --- ACCIÓN DE LOGIN ---
+    function ejecutarLogin() {
+      let correo = document.getElementById('txtCorreo').value;
+      let pass = document.getElementById('txtPassword').value;
 
-    // --- LOGIN ---
-    function login() {
-      let c = document.getElementById('txtCorreo').value, p = document.getElementById('txtPassword').value;
-      if(!c || !p) return;
-      document.getElementById('btnLogin').disabled = true;
-      
-      fetch(API_URL + 'login.php', { method: 'POST', body: JSON.stringify({correo: c, password: p}) })
+      if(!correo || !pass) return alert("Por favor complete las casillas.");
+
+      fetch(API_URL + 'login.php', {
+        method: 'POST',
+        body: JSON.stringify({ correo: correo, password: pass })
+      })
       .then(r => r.json())
       .then(res => {
         if(res.success) {
-          sessionStorage.setItem('id_usuario', res.id_usuario);
-          sessionStorage.setItem('nombre_usuario', res.nombre);
-          sessionStorage.setItem('rol_usuario', res.rol);
-          sessionStorage.setItem('sede_usuario', res.sede);
-          iniciarApp();
+          iniciarApp(res);
         } else {
-          document.getElementById('msgLogin').innerText = res.message;
-          document.getElementById('btnLogin').disabled = false;
+          alert(res.message || "Credenciales incorrectas.");
         }
-      }).catch(e => { alert("Error de conexión"); document.getElementById('btnLogin').disabled = false; });
+      })
+      .catch(e => alert("Error conectando con el servidor API."));
     }
 
-    function logout() { sessionStorage.clear(); window.location.reload(); }
-
-    // --- NAVEGACIÓN Y CONFIGURACIÓN INICIAL ---
-    function iniciarApp() {
-      document.getElementById('login-view').style.display = 'none';
-      document.getElementById('app-view').style.display = 'block';
-      document.getElementById('lblUser').innerText = sessionStorage.getItem('nombre_usuario') + " (" + sessionStorage.getItem('sede_usuario') + ")";
+    // --- INICIALIZACIÓN DE LA APP ---
+    function iniciarApp(usuario) {
+      usuarioLogueado = usuario;
       
-      if(sessionStorage.getItem('rol_usuario') === 'Admin') {
-        document.getElementById('tab-auditoria').style.display = 'block';
-        document.getElementById('tab-caja').style.display = 'block';
+      document.getElementById('view-login').style.display = 'none';
+      document.getElementById('view-app').style.display = 'block';
+      document.getElementById('lblUsuarioNav').innerText = usuario.nombre;
+      
+      // Forzar encendido de la pestaña requerimiento para cualquier rol
+      if(document.getElementById('tab-requerimiento')) {
+        document.getElementById('tab-requerimiento').style.display = 'block';
+      }
+
+      // Privilegios condicionales si es Administrador
+      if(usuario.rol === 'Admin') {
+        if(document.getElementById('tab-usuarios')) document.getElementById('tab-usuarios').style.display = 'block';
+        if(document.getElementById('tab-reportes')) document.getElementById('tab-reportes').style.display = 'block';
+        if(document.getElementById('tab-sedes')) document.getElementById('tab-sedes').style.display = 'block';
+      } else {
+        if(document.getElementById('tab-usuarios')) document.getElementById('tab-usuarios').style.display = 'none';
+        if(document.getElementById('tab-reportes')) document.getElementById('tab-reportes').style.display = 'none';
+        if(document.getElementById('tab-sedes')) document.getElementById('tab-sedes').style.display = 'none';
       }
       
       cargarMaestros();
-      abrirModulo('modulo-monitor');
+      abrirModulo('modulo-requerimiento');
     }
 
+    // --- CAMBIAR ENTRE PESTAÑAS (CONTROL DEL MODULO) ---
     function abrirModulo(idModulo) {
-      document.querySelectorAll('.modulo').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.modulo').forEach(m => m.style.display = 'none');
+      
+      let mod = document.getElementById(idModulo);
+      if(mod) mod.style.display = 'block';
+      
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(idModulo).classList.add('active');
-      document.getElementById('tab-' + idModulo.split('-')[1]).classList.add('active');
-
-      if(idModulo === 'modulo-monitor') cargarTickets();
-      if(idModulo === 'modulo-auditoria') cargarTickets();
-      if(idModulo === 'modulo-caja') cargarTickets();
+      
+      if(idModulo === 'modulo-requerimiento') {
+        document.getElementById('tab-requerimiento').classList.add('active');
+      } else if(idModulo === 'modulo-historial') {
+        document.getElementById('tab-historial').classList.add('active');
+        cargarTickets();
+      } else if(idModulo === 'modulo-reportes') {
+        document.getElementById('tab-reportes').classList.add('active');
+        cargarReportes();
+      } else if(idModulo === 'modulo-sedes') {
+        document.getElementById('tab-sedes').classList.add('active');
+      } else if(idModulo === 'modulo-usuarios') {
+        document.getElementById('tab-usuarios').classList.add('active');
+      }
     }
 
     // --- CARGA DE MAESTROS (Dropdowns) ---
     function cargarMaestros() {
-      // 1. Carga los conceptos y agencias que ya tenías
       fetch(API_URL + 'obtener_maestros.php')
       .then(r => r.json())
       .then(res => {
@@ -222,220 +386,221 @@
         }
       });
 
-      // 2. 🔥 NUEVO: Carga automáticamente tus sedes de la base de datos
       cargarSedesEnFormulario();
     }
 
-    // --- CARRITO DE SOLICITUDES ---
-    function agregarCarrito() {
-      let selC = document.getElementById('selConcepto');
-      let selA = document.getElementById('selAgencia');
-      let imp = parseFloat(document.getElementById('txtImporte').value);
+    // --- JALAR LAS SEDES MAESTRAS DESDE BD ---
+    function cargarSedesEnFormulario() {
+      let comboSedes = document.getElementById('selSedeRequerimiento');
+      if(!comboSedes) return;
+
+      fetch(API_URL + 'obtener_sedes.php')
+      .then(r => r.json())
+      .then(data => {
+        comboSedes.innerHTML = '<option value="">-- Seleccione un lugar --</option>';
+        data.forEach(sede => {
+            comboSedes.innerHTML += `<option value="${sede.nombre_sede}">${sede.nombre_sede}</option>`;
+        });
+      })
+      .catch(e => console.error("Error cargando sedes", e));
+    }
+
+    // --- JALAR USUARIOS DE LA SEDE SELECCIONADA ---
+    function cargarUsuariosPorSede(sedeSeleccionada) {
+      let comboUser = document.getElementById('selUsuarioRequerimiento');
+      if(!comboUser) return;
       
-      if(isNaN(imp) || imp <= 0) return alert("Ingrese un importe válido");
+      comboUser.innerHTML = '<option value="">Cargando personal...</option>';
       
-      carrito.push({
-        id_concepto: selC.value, nombre_concepto: selC.options[selC.selectedIndex].text,
-        id_agencia: selA.value, nombre_agencia: selA.value ? selA.options[selA.selectedIndex].text : 'N/A',
-        importe: imp
+      if(!sedeSeleccionada) {
+          comboUser.innerHTML = '<option value="">-- Seleccione una sede primero --</option>';
+          return;
+      }
+
+      fetch(API_URL + 'obtener_usuarios_sede.php?sede=' + encodeURIComponent(sedeSeleccionada))
+      .then(r => r.json())
+      .then(data => {
+          if(data.length === 0) {
+              comboUser.innerHTML = '<option value="">⚠️ No hay usuarios en esta sede</option>';
+              return;
+          }
+          comboUser.innerHTML = '<option value="">-- Seleccione quién solicita --</option>';
+          data.forEach(user => {
+              comboUser.innerHTML += `<option value="${user.id_usuario}">${user.nombre_completo}</option>`;
+          });
+      })
+      .catch(e => {
+          comboUser.innerHTML = '<option value="">Error al conectar</option>';
       });
+    }
+
+    // --- LÓGICA DEL TICKET TEMPORAL DE CONCEPTOS ---
+    function agregarItemTabla() {
+      let idConcepto = document.getElementById('selConcepto').value;
+      let idAgencia = document.getElementById('selAgencia').value;
+      let importe = parseFloat(document.getElementById('txtImporte').value);
+
+      if(!importe || importe <= 0) return alert("Ingrese un importe válido.");
+
+      let textConcepto = document.getElementById('selConcepto').options[document.getElementById('selConcepto').selectedIndex].text;
+      let textAgencia = idAgencia ? document.getElementById('selAgencia').options[document.getElementById('selAgencia').selectedIndex].text : "N/A";
+
+      listaItemsTemporal.push({
+        id_concepto: idConcepto,
+        nombre_concepto: textConcepto,
+        id_agencia: idAgencia ? idAgencia : "N/A",
+        nombre_agencia: textAgencia,
+        importe: importe
+      });
+
       document.getElementById('txtImporte').value = '';
-      renderCarrito();
+      renderizarTablaTemporal();
     }
 
-    function renderCarrito() {
+    function removerItemTemporal(index) {
+      listaItemsTemporal.splice(index, 1);
+      renderizarTablaTemporal();
+    }
+
+    function renderizarTablaTemporal() {
+      let tbody = document.querySelector('#tablaTemporal tbody');
+      tbody.innerHTML = '';
       let total = 0;
-      document.getElementById('tbCarrito').innerHTML = carrito.map((c, i) => {
-        total += c.importe;
-        return `<tr><td>${c.nombre_concepto}</td><td>${c.nombre_agencia}</td><td>S/ ${c.importe.toFixed(2)}</td><td><button onclick="carrito.splice(${i},1); renderCarrito()">❌</button></td></tr>`;
-      }).join('');
-      document.getElementById('lblTotal').innerText = `S/ ${total.toFixed(2)}`;
-      document.getElementById('btnEmitir').style.display = carrito.length > 0 ? 'inline-block' : 'none';
+
+      listaItemsTemporal.forEach((item, index) => {
+        total += item.importe;
+        tbody.innerHTML += `
+          <tr>
+            <td>${item.nombre_concepto}</td>
+            <td>${item.nombre_agencia}</td>
+            <td>S/. ${item.importe.toFixed(2)}</td>
+            <td><button class="btn-danger" onclick="removerItemTemporal(${index})">❌</button></td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('lblTotalTicket').innerText = total.toFixed(2);
     }
 
+    // --- GUARDAR REQUERIMIENTO COMPLETO ---
     function emitirTicket() {
-      if(!confirm("¿Emitir solicitud?")) return;
-      document.getElementById('btnEmitir').disabled = true;
-      
+      let sede = document.getElementById('selSedeRequerimiento').value;
+      let solicitante = document.getElementById('selUsuarioRequerimiento').value;
+      let glosa = document.getElementById('txtDetalleGlosa').value;
+      let total = parseFloat(document.getElementById('lblTotalTicket').innerText);
+
+      if(!sede || !solicitante || !glosa || listaItemsTemporal.length === 0) {
+        return alert("Complete Sede, Solicitante, Detalle y añada conceptos.");
+      }
+
       let payload = {
-        id_usuario: sessionStorage.getItem('id_usuario'),
-        sede: sessionStorage.getItem('sede_usuario'),
-        monto_total: carrito.reduce((sum, item) => sum + item.importe, 0),
-        detalles: carrito
+        id_usuario: solicitante, 
+        sede: sede,
+        detalles: glosa,
+        monto_total: total,
+        items: listaItemsTemporal
       };
 
-      fetch(API_URL + 'registrar_solicitud.php', { method: 'POST', body: JSON.stringify(payload) })
+      fetch(API_URL + 'registrar_solicitud.php', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
       .then(r => r.json())
       .then(res => {
         alert(res.message);
-        if(res.success) { carrito = []; renderCarrito(); abrirModulo('modulo-monitor'); }
-        document.getElementById('btnEmitir').disabled = false;
+        if(res.success) {
+          listaItemsTemporal = [];
+          document.getElementById('txtDetalleGlosa').value = '';
+          document.getElementById('selSedeRequerimiento').value = '';
+          document.getElementById('selUsuarioRequerimiento').innerHTML = '<option value="">-- Seleccione una sede primero --</option>';
+          renderizarTablaTemporal();
+          abrirModulo('modulo-historial');
+        }
       });
     }
 
-    // --- CARGA DE TICKETS (Monitor, Auditoría, Caja) ---
+    // --- CARGAR HISTORIAL DE TICKETS ---
     function cargarTickets() {
-      let payload = { rol: sessionStorage.getItem('rol_usuario'), id_usuario: sessionStorage.getItem('id_usuario') };
-      
-      fetch(API_URL + 'obtener_tickets.php', { method: 'POST', body: JSON.stringify(payload) })
+      let payload = { rol: usuarioLogueado.rol, id_usuario: usuarioLogueado.id_usuario };
+
+      fetch(API_URL + 'obtener_tickets.php', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then(r => r.json())
+      .then(data => {
+        let tbody = document.querySelector('#tablaTickets tbody');
+        tbody.innerHTML = '';
+        
+        data.forEach(t => {
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${t.id_solicitud}</strong></td>
+              <td>${t.fecha_hora}</td>
+              <td>${t.solicitante}</td>
+              <td>${t.sede}</td>
+              <td>S/. ${parseFloat(t.monto_total).toFixed(2)}</td>
+              <td><span style="padding:4px 8px; border-radius:12px; font-weight:bold; background:#fff8e1; color:#f57f17;">${t.estado_actual}</span></td>
+              <td><button class="btn-primary" style="padding:6px; font-size:12px;" onclick="alert('Detalle: '+ '${t.sede}')">Ver</button></td>
+            </tr>
+          `;
+        });
+      });
+    }
+
+    // --- REGISTRAR NUEVA SEDE EN BASE DE DATOS ---
+    function crearSede() {
+      let nombreSede = document.getElementById('txtNuevaSedeAdmin').value;
+      if(!nombreSede) return alert("Ingrese el nombre de la sede.");
+
+      fetch(API_URL + 'registrar_sede.php', { 
+          method: 'POST', 
+          body: JSON.stringify({ nombre_sede: nombreSede }) 
+      })
+      .then(r => r.json())
+      .then(res => {
+        alert(res.message);
+        if(res.success) {
+           document.getElementById('txtNuevaSedeAdmin').value = '';
+           cargarSedesEnFormulario(); // Recargar el combo inmediatamente
+        }
+      });
+    }
+
+    // --- DIBUJAR REPORTES CON CHART.JS ---
+    function cargarReportes() {
+      fetch(API_URL + 'obtener_reportes.php')
       .then(r => r.json())
       .then(res => {
         if(res.success) {
-          renderMonitor(res.tickets.filter(t => t.id_solicitante === payload.id_usuario));
-          if(payload.rol === 'Admin') {
-            renderAuditoria(res.tickets.filter(t => t.estado_actual === 'Pendiente'));
-            renderCaja(res.tickets.filter(t => t.estado_actual === 'Aprobado' || t.estado_actual === 'Depositado'));
-          }
+          dibujarGrafico('chartEstado', 'doughnut', res.porEstado, chartEstadoInst, (chart) => chartEstadoInst = chart);
+          dibujarGrafico('chartConcepto', 'bar', res.porConcepto, chartConceptoInst, (chart) => chartConceptoInst = chart);
         }
-      });
+      }).catch(e => console.error("Error cargando gráficos", e));
     }
 
-    function generarTablaDetalles(detalles) {
-      return `<table style="background:#fafafa; margin-bottom:10px;">
-        <tr><th>Concepto</th><th>Agencia</th><th>Importe</th></tr>
-        ${detalles.map(d => `<tr><td>${d.nombre_gasto}</td><td>${d.nombre_agencia}</td><td>S/ ${d.importe}</td></tr>`).join('')}
-      </table>`;
-    }
+    function dibujarGrafico(idCanvas, tipo, datos, instanciaPrevia, setInstancia) {
+      if(instanciaPrevia) instanciaPrevia.destroy();
 
-    function renderMonitor(tickets) {
-      document.getElementById('listaMonitor').innerHTML = tickets.length ? tickets.map(t => 
-        `<div class="card" style="border-left:4px solid var(--cat-yellow)">
-          <b>${t.id_solicitud}</b> - S/ ${t.monto_total} <span style="float:right; font-weight:bold;">${t.estado_actual}</span>
-          ${generarTablaDetalles(t.detalles)}
-        </div>`
-      ).join('') : 'No hay solicitudes.';
-    }
-
-    function renderAuditoria(tickets) {
-      document.getElementById('listaAuditoria').innerHTML = tickets.length ? tickets.map(t => 
-        `<div class="card" style="border-left:4px solid #d32f2f">
-          <b>${t.id_solicitud}</b> | ${t.solicitante} (${t.sede}) - S/ ${t.monto_total}
-          ${generarTablaDetalles(t.detalles)}
-          <button class="btn-primary" onclick="cambiarEstado('${t.id_solicitud}', 'Aprobado')">✅ Aprobar</button>
-          <button class="btn-primary" style="background:#d32f2f;" onclick="cambiarEstado('${t.id_solicitud}', 'Observado')">⚠️ Observar</button>
-        </div>`
-      ).join('') : 'Bandeja limpia.';
-    }
-
-    function renderCaja(tickets) {
-      document.getElementById('listaCaja').innerHTML = tickets.length ? tickets.map(t => 
-        `<div class="card" style="border-left:4px solid #1565c0; opacity: ${t.estado_actual === 'Depositado' ? '0.6' : '1'}">
-          <b>${t.id_solicitud}</b> | ${t.solicitante} (${t.sede}) - S/ ${t.monto_total} [${t.estado_actual}]
-          ${generarTablaDetalles(t.detalles)}
-          ${t.estado_actual === 'Aprobado' ? `
-            <input type="text" id="op_${t.id_solicitud}" placeholder="N° Operación (Opcional)" style="width:200px; display:inline-block;">
-            <button class="btn-primary" style="background:#1565c0;" onclick="cambiarEstado('${t.id_solicitud}', 'Depositado', document.getElementById('op_${t.id_solicitud}').value)">Confirmar Depósito</button>
-          ` : '<i>Pago Confirmado</i>'}
-        </div>`
-      ).join('') : 'No hay pagos pendientes.';
-    }
-
-    function cambiarEstado(id, estado, comentario = '') {
-      if(!confirm(`¿Marcar ticket como ${estado}?`)) return;
-      let payload = { id_solicitud: id, nuevo_estado: estado, id_usuario: sessionStorage.getItem('id_usuario'), comentario: comentario };
+      let etiquetas = datos.map(d => d.etiqueta || 'Sin Asignar');
+      let valores = datos.map(d => parseFloat(d.total));
       
-      fetch(API_URL + 'cambiar_estado.php', { method: 'POST', body: JSON.stringify(payload) })
-      .then(r => r.json())
-      .then(res => { alert(res.message); cargarTickets(); });
+      let ctx = document.getElementById(idCanvas).getContext('2d');
+      let nuevoGrafico = new Chart(ctx, {
+        type: tipo,
+        data: {
+          labels: etiquetas,
+          datasets: [{
+            label: 'Total (S/.)',
+            data: valores,
+            backgroundColor: ['#FFB81C', '#1a1a1a', '#d32f2f', '#1565c0', '#4caf50'],
+            borderWidth: 1
+          }]
+        },
+        options: { responsive: true }
+      });
+      setInstancia(nuevoGrafico);
     }
-
-    // Carga dinámicamente los usuarios según la sede seleccionada
-    function cargarUsuariosPorSede(sedeSeleccionada) {
-        let comboUser = document.getElementById('selUsuarioRequerimiento');
-        comboUser.innerHTML = '<option value="">Cargando personal...</option>';
-        
-        if(!sedeSeleccionada) {
-            comboUser.innerHTML = '<option value="">-- Seleccione una sede primero --</option>';
-            return;
-        }
-
-        fetch(API_URL + 'obtener_usuarios_sede.php?sede=' + encodeURIComponent(sedeSeleccionada))
-        .then(r => r.json())
-        .then(data => {
-            if(data.length === 0) {
-                comboUser.innerHTML = '<option value="">⚠️ No hay usuarios en esta sede</option>';
-                return;
-            }
-            comboUser.innerHTML = '<option value="">-- Seleccione quién solicita --</option>';
-            data.forEach(user => {
-                comboUser.innerHTML += `<option value="${user.id_usuario}">${user.nombre_completo}</option>`;
-            });
-        })
-        .catch(e => {
-            comboUser.innerHTML = '<option value="">Error al conectar</option>';
-        });
-    }
-
-    // Al emitir el ticket final, debemos mandar la sede, el usuario de la casilla inteligente y el detalle
-    function emitirTicketCompleto() {
-        let sede = document.getElementById('selSedeRequerimiento').value;
-        let solicitante = document.getElementById('selUsuarioRequerimiento').value;
-        let glosa = document.getElementById('txtDetalleGlosa').value;
-        
-        if(!sede || !solicitante || !glosa || listaItemsTemporal.length === 0) {
-            return alert("Por favor complete Sede, Solicitante, Detalle y añada al menos un concepto.");
-        }
-
-        let payload = {
-            id_solicitante: solicitante, // Usa el seleccionado en el combo inteligente
-            sede: sede,
-            detalle_glosa: glosa,
-            items: listaItemsTemporal
-        };
-
-        fetch(API_URL + 'crear_ticket.php', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        })
-        .then(r => r.json())
-        .then(res => {
-            alert(res.message);
-            if(res.success) {
-                // Limpiar todo el formulario
-                listaItemsTemporal = [];
-                document.getElementById('txtDetalleGlosa').value = '';
-                document.getElementById('selSedeRequerimiento').value = '';
-                document.getElementById('selUsuarioRequerimiento').innerHTML = '<option value="">-- Seleccione una sede primero --</option>';
-                renderizarTablaTemporal();
-            }
-        });
-
-        // --- FUNCIÓN PARA JALAR LAS SEDES DE LA BASE DE DATOS ---
-    function cargarSedesEnFormulario() {
-        let comboSedes = document.getElementById('selSedeRequerimiento');
-        
-        // Llamamos al archivo PHP que acabamos de crear en cPanel
-        fetch(API_URL + 'obtener_sedes.php')
-        .then(r => r.json())
-        .then(data => {
-            // Limpiamos la casilla y la preparamos
-            comboSedes.innerHTML = '<option value="">-- Seleccione un lugar --</option>';
-            
-            // Por cada sede que encuentre en la BD, agrega una opción en el menú desplegable
-            data.forEach(sede => {
-                comboSedes.innerHTML += `<option value="${sede.nombre_sede}">${sede.nombre_sede}</option>`;
-            });
-        })
-        .catch(e => console.error("Error cargando sedes en el combo", e));
-    }
-
-        // --- FUNCIÓN PARA JALAR LAS SEDES DE LA BASE DE DATOS ---
-        function cargarSedesEnFormulario() {
-        let comboSedes = document.getElementById('selSedeRequerimiento');
-        if(!comboSedes) return; // Por seguridad, si no encuentra la casilla no hace nada
-
-        fetch(API_URL + 'obtener_sedes.php')
-        .then(r => r.json())
-        .then(data => {
-            comboSedes.innerHTML = '<option value="">-- Seleccione un lugar --</option>';
-            data.forEach(sede => {
-                comboSedes.innerHTML += `<option value="${sede.nombre_sede}">${sede.nombre_sede}</option>`;
-            });
-        })
-        .catch(e => console.error("Error cargando sedes en el combo", e));
-        }
-
-}
   </script>
 </body>
 </html>
