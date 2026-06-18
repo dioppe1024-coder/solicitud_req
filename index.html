@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sistema de Logística CAT</title>
-  <link rel="stylesheet" href="./styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root { 
@@ -13,154 +12,59 @@
       --cat-gray: #f4f5f7; 
       --cat-white: #ffffff; 
     }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    body { 
-      background: #f5f5f7; 
-      margin: 0; 
-      min-height: 100vh; 
-      color: var(--cat-black);
-      padding-bottom: 75px; /* Espacio para que la barra inferior no tape nada */
-    }
-    
-    /* Contenedor Principal */
-    .main-container {
-      padding: 15px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* Tarjetas y Contenedores */
-    .card { 
-      background: var(--cat-white); 
-      border-radius: 12px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
-      padding: 20px; 
-      margin-bottom: 20px; 
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-      font-size: 14px;
-    }
-
-    input, select, textarea { 
-      width: 100%;
-      padding: 12px; 
-      border: 1px solid #ccc; 
-      border-radius: 8px; 
-      font-size: 16px; /* Evita zoom automático molesto en iOS */
-      background-color: #fff;
-      margin-bottom: 12px;
-    }
-
-    /* Botones Estilo Celular */
-    .btn-primary { 
-      background: var(--cat-yellow); 
-      color: var(--cat-black); 
-      font-weight: bold; 
-      border: none; 
-      padding: 14px 20px; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      width: 100%;
-      font-size: 16px;
-      transition: background 0.2s;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #f5f5f7; margin: 0; min-height: 100vh; color: var(--cat-black); padding-bottom: 75px; }
+    .main-container { padding: 15px; max-width: 1200px; margin: 0 auto; }
+    .card { background: var(--cat-white); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 20px; margin-bottom: 20px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; background-color: #fff; margin-bottom: 12px; }
+    .btn-primary { background: var(--cat-yellow); color: var(--cat-black); font-weight: bold; border: none; padding: 14px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; transition: background 0.2s; }
     .btn-primary:hover { background: #e5a517; }
-
-    .btn-danger { 
-      background: #d32f2f; 
-      color: #fff; 
-      border: none; 
-      padding: 8px 12px; 
-      border-radius: 6px; 
-      cursor: pointer; 
-    }
-
-    /* Tablas Responsivas */
-    .table-responsive { 
-      width: 100%; 
-      overflow-x: auto; 
-      -webkit-overflow-scrolling: touch;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: 1px solid #eee;
-    }
+    .btn-danger { background: #d32f2f; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 10px; border-radius: 8px; border: 1px solid #eee; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th { background: #eee; text-align: left; padding: 12px; border-bottom: 2px solid #ccc; font-weight: 600; }
     td { padding: 12px; border-bottom: 1px solid #eee; background: #fff; }
-
-    /* Barra de Navegación Móvil Inferior */
-    .nav-tabs { 
-      display: flex; 
-      position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      right: 0; 
-      background: #1a1a1a; 
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.1); 
-      z-index: 999; 
-      overflow-x: auto;
-      white-space: nowrap;
-    }
-    .tab { 
-      flex: 1; 
-      text-align: center; 
-      padding: 15px 10px; 
-      color: #aaa; 
-      font-size: 12px; 
-      font-weight: 500; 
-      cursor: pointer; 
-      min-width: 90px;
-      transition: all 0.2s;
-    }
-    .tab.active { 
-      color: var(--cat-yellow); 
-      border-top: 3px solid var(--cat-yellow); 
-      background: rgba(255, 184, 28, 0.05); 
-    }
-
+    .nav-tabs { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a1a; box-shadow: 0 -4px 10px rgba(0,0,0,0.1); z-index: 999; overflow-x: auto; white-space: nowrap; }
+    .tab { flex: 1; text-align: center; padding: 15px 10px; color: #aaa; font-size: 12px; font-weight: 500; cursor: pointer; min-width: 90px; transition: all 0.2s; }
+    .tab.active { color: var(--cat-yellow); border-top: 3px solid var(--cat-yellow); background: rgba(255, 184, 28, 0.05); }
     .modulo { display: none; }
-    
-    /* Login Centrado */
-    .login-container { max-width: 400px; margin: 80px auto padding: 20px; }
+    /* FIX: login-container tenía error de sintaxis en CSS (faltaba punto y coma) */
+    .login-container { max-width: 400px; margin: 80px auto; padding: 20px; }
   </style>
 </head>
 <body>
 
+  <!-- ===================== LOGIN ===================== -->
   <div id="view-login" class="main-container login-container">
     <div class="card" style="text-align: center;">
       <h2 style="margin-bottom: 20px;">🔑 Acceso al Sistema</h2>
       <div style="text-align: left;">
         <label>Correo Electrónico</label>
         <input type="email" id="txtCorreo" placeholder="ejemplo@cat.com">
-        
         <label>Contraseña</label>
         <input type="password" id="txtPassword" placeholder="••••••••">
-        
+        <!-- FIX: Añadido listener Enter para login -->
         <button class="btn-primary" onclick="ejecutarLogin()" style="margin-top: 10px;">Ingresar de Forma Segura</button>
       </div>
     </div>
   </div>
 
+  <!-- ===================== APP ===================== -->
   <div id="view-app" style="display: none;">
-    
+
     <div style="background: #1a1a1a; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
       <span style="font-weight: bold; color: var(--cat-yellow);">🚜 LOGÍSTICA CAT</span>
-      <span id="lblUsuarioNav" style="font-size: 14px; background: #333; padding: 5px 10px; border-radius: 20px;">Usuario</span>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span id="lblUsuarioNav" style="font-size: 14px; background: #333; padding: 5px 10px; border-radius: 20px;">Usuario</span>
+        <!-- FIX: Botón cerrar sesión agregado -->
+        <button onclick="cerrarSesion()" style="background:#d32f2f; color:#fff; border:none; padding:5px 12px; border-radius:20px; cursor:pointer; font-size:13px;">Salir</button>
+      </div>
     </div>
 
     <div class="main-container">
-      
+
+      <!-- MÓDULO: NUEVO REQUERIMIENTO -->
       <div id="modulo-requerimiento" class="modulo card">
         <h2>Nuevo Requerimiento de Dinero</h2>
         <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Complete la sede para desplegar el personal autorizado.</p>
@@ -199,7 +103,7 @@
           </div>
           <div>
             <label>Importe (S/.)</label>
-            <input type="number" id="txtImporte" step="0.01" placeholder="0.00">
+            <input type="number" id="txtImporte" step="0.01" placeholder="0.00" min="0">
           </div>
           <div style="display: flex; align-items: flex-end;">
             <button class="btn-primary" onclick="agregarItemTabla()" style="background:#222; color:#fff;">+ Añadir Línea</button>
@@ -227,6 +131,7 @@
         <button class="btn-primary" onclick="emitirTicket()" style="margin-top:20px;">🚀 Emitir Ticket de Requerimiento</button>
       </div>
 
+      <!-- MÓDULO: HISTORIAL -->
       <div id="modulo-historial" class="modulo card">
         <h2>Bandeja de Requerimientos</h2>
         <div class="table-responsive">
@@ -247,11 +152,41 @@
         </div>
       </div>
 
+      <!-- MÓDULO: USUARIOS -->
       <div id="modulo-usuarios" class="modulo card">
         <h2>Gestión de Usuarios</h2>
-        <p style="color:#666; margin-bottom:15px;">Módulo exclusivo de administración.</p>
+        <p style="color:#666; margin-bottom:15px;">Registrar nuevo encargado.</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+          <div>
+            <label>Nombre Completo</label>
+            <input type="text" id="txtNombreUsuario" placeholder="Ej. Juan Pérez">
+          </div>
+          <div>
+            <label>Correo Electrónico</label>
+            <input type="email" id="txtCorreoUsuario" placeholder="juan@empresa.com">
+          </div>
+          <div>
+            <label>Contraseña</label>
+            <input type="password" id="txtPassUsuario" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div>
+            <label>Rol</label>
+            <select id="selRolUsuario">
+              <option value="Usuario">Usuario</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+          <div>
+            <label>Sede</label>
+            <select id="selSedeUsuario">
+              <option value="">-- Cargando sedes --</option>
+            </select>
+          </div>
         </div>
+        <button class="btn-primary" onclick="registrarUsuario()" style="margin-top:15px;">Guardar Nuevo Encargado</button>
+      </div>
 
+      <!-- MÓDULO: REPORTES -->
       <div id="modulo-reportes" class="modulo card">
         <h2>Dashboard Gerencial</h2>
         <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:15px;">
@@ -266,21 +201,23 @@
         </div>
       </div>
 
+      <!-- MÓDULO: SEDES -->
       <div id="modulo-sedes" class="modulo card">
         <h2>Administración de Sedes</h2>
         <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px; align-items:flex-end;">
           <div style="flex:1; min-width:250px;">
-              <label>Nombre de la Nueva Sede</label>
-              <input type="text" id="txtNuevaSedeAdmin" placeholder="Ej. Sucursal Piura">
+            <label>Nombre de la Nueva Sede</label>
+            <input type="text" id="txtNuevaSedeAdmin" placeholder="Ej. Sucursal Piura">
           </div>
           <div>
-              <button class="btn-primary" onclick="crearSede()" style="width:auto; padding:12px 25px;">Guardar Sede</button>
+            <button class="btn-primary" onclick="crearSede()" style="width:auto; padding:12px 25px;">Guardar Sede</button>
           </div>
         </div>
       </div>
 
-    </div>
+    </div><!-- fin main-container -->
 
+    <!-- BARRA DE NAVEGACIÓN INFERIOR -->
     <div class="nav-tabs">
       <div class="tab" onclick="abrirModulo('modulo-requerimiento')" id="tab-requerimiento">📝 Nuevo Req.</div>
       <div class="tab" onclick="abrirModulo('modulo-historial')" id="tab-historial">📂 Bandeja</div>
@@ -289,26 +226,31 @@
       <div class="tab" onclick="abrirModulo('modulo-usuarios')" id="tab-usuarios" style="display:none;">👥 Usuarios</div>
     </div>
 
-  </div>
+  </div><!-- fin view-app -->
 
   <script>
-    const API_URL = "https://www.magsa.com.pe/api/"; // Cambia esta ruta por la real de tu API si varía
+    // ===================== CONFIGURACIÓN =====================
+    const API_URL = "https://www.magsa.com.pe/api/";
     let usuarioLogueado = null;
     let maestros = { conceptos: [], agencias: [] };
     let listaItemsTemporal = [];
-    
     let chartEstadoInst = null;
     let chartConceptoInst = null;
 
-    // --- ACCIÓN DE LOGIN ---
+    // ===================== LOGIN =====================
+    // FIX: Enter en los campos dispara el login
+    document.getElementById('txtCorreo').addEventListener('keypress', e => { if(e.key === 'Enter') ejecutarLogin(); });
+    document.getElementById('txtPassword').addEventListener('keypress', e => { if(e.key === 'Enter') ejecutarLogin(); });
+
     function ejecutarLogin() {
-      let correo = document.getElementById('txtCorreo').value;
-      let pass = document.getElementById('txtPassword').value;
+      let correo = document.getElementById('txtCorreo').value.trim();
+      let pass   = document.getElementById('txtPassword').value;
 
       if(!correo || !pass) return alert("Por favor complete las casillas.");
 
       fetch(API_URL + 'login.php', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, // FIX: header agregado
         body: JSON.stringify({ correo: correo, password: pass })
       })
       .then(r => r.json())
@@ -322,138 +264,137 @@
       .catch(e => alert("Error conectando con el servidor API."));
     }
 
-    // --- INICIALIZACIÓN DE LA APP ---
+    // ===================== INICIAR APP =====================
     function iniciarApp(usuario) {
       usuarioLogueado = usuario;
-      
       document.getElementById('view-login').style.display = 'none';
-      document.getElementById('view-app').style.display = 'block';
-      document.getElementById('lblUsuarioNav').innerText = usuario.nombre;
-      
-      // Forzar encendido de la pestaña requerimiento para cualquier rol
-      if(document.getElementById('tab-requerimiento')) {
-        document.getElementById('tab-requerimiento').style.display = 'block';
-      }
+      document.getElementById('view-app').style.display   = 'block';
+      document.getElementById('lblUsuarioNav').innerText  = usuario.nombre + ' (' + usuario.rol + ')';
 
-      // Privilegios condicionales si es Administrador
-      if(usuario.rol === 'Admin') {
-        if(document.getElementById('tab-usuarios')) document.getElementById('tab-usuarios').style.display = 'block';
-        if(document.getElementById('tab-reportes')) document.getElementById('tab-reportes').style.display = 'block';
-        if(document.getElementById('tab-sedes')) document.getElementById('tab-sedes').style.display = 'block';
-      } else {
-        if(document.getElementById('tab-usuarios')) document.getElementById('tab-usuarios').style.display = 'none';
-        if(document.getElementById('tab-reportes')) document.getElementById('tab-reportes').style.display = 'none';
-        if(document.getElementById('tab-sedes')) document.getElementById('tab-sedes').style.display = 'none';
-      }
-      
+      // Mostrar/ocultar pestañas según rol
+      let esAdmin = (usuario.rol === 'Admin');
+      ['tab-usuarios','tab-reportes','tab-sedes'].forEach(id => {
+        document.getElementById(id).style.display = esAdmin ? 'block' : 'none';
+      });
+
       cargarMaestros();
+      cargarSedesEnFormulario();
       abrirModulo('modulo-requerimiento');
     }
 
-    // --- CAMBIAR ENTRE PESTAÑAS (CONTROL DEL MODULO) ---
-    function abrirModulo(idModulo) {
-      document.querySelectorAll('.modulo').forEach(m => m.style.display = 'none');
-      
-      let mod = document.getElementById(idModulo);
-      if(mod) mod.style.display = 'block';
-      
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      
-      if(idModulo === 'modulo-requerimiento') {
-        document.getElementById('tab-requerimiento').classList.add('active');
-      } else if(idModulo === 'modulo-historial') {
-        document.getElementById('tab-historial').classList.add('active');
-        cargarTickets();
-      } else if(idModulo === 'modulo-reportes') {
-        document.getElementById('tab-reportes').classList.add('active');
-        cargarReportes();
-      } else if(idModulo === 'modulo-sedes') {
-        document.getElementById('tab-sedes').classList.add('active');
-      } else if(idModulo === 'modulo-usuarios') {
-        document.getElementById('tab-usuarios').classList.add('active');
-      }
+    // ===================== CERRAR SESIÓN =====================
+    function cerrarSesion() {
+      if(!confirm("¿Desea cerrar sesión?")) return;
+      usuarioLogueado = null;
+      listaItemsTemporal = [];
+      document.getElementById('view-app').style.display   = 'none';
+      document.getElementById('view-login').style.display = 'block';
+      document.getElementById('txtCorreo').value    = '';
+      document.getElementById('txtPassword').value  = '';
     }
 
-    // --- CARGA DE MAESTROS (Dropdowns) ---
+    // ===================== NAVEGACIÓN =====================
+    function abrirModulo(idModulo) {
+      document.querySelectorAll('.modulo').forEach(m => m.style.display = 'none');
+      let mod = document.getElementById(idModulo);
+      if(mod) mod.style.display = 'block';
+
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      let tabMap = {
+        'modulo-requerimiento': 'tab-requerimiento',
+        'modulo-historial':     'tab-historial',
+        'modulo-reportes':      'tab-reportes',
+        'modulo-sedes':         'tab-sedes',
+        'modulo-usuarios':      'tab-usuarios'
+      };
+      if(tabMap[idModulo]) document.getElementById(tabMap[idModulo]).classList.add('active');
+
+      if(idModulo === 'modulo-historial') cargarTickets();
+      if(idModulo === 'modulo-reportes')  cargarReportes();
+      if(idModulo === 'modulo-usuarios')  cargarSedesEnSelectUsuario();
+    }
+
+    // ===================== MAESTROS (DROPDOWNS) =====================
     function cargarMaestros() {
       fetch(API_URL + 'obtener_maestros.php')
       .then(r => r.json())
       .then(res => {
         if(res.success) {
           maestros = res;
-          document.getElementById('selConcepto').innerHTML = res.conceptos.map(c => `<option value="${c.id_concepto}">${c.nombre_gasto}</option>`).join('');
-          document.getElementById('selAgencia').innerHTML = `<option value="">-- Ninguna --</option>` + res.agencias.map(a => `<option value="${a.id_agencia}">${a.nombre_agencia}</option>`).join('');
+          document.getElementById('selConcepto').innerHTML = res.conceptos.map(c =>
+            `<option value="${c.id_concepto}">${c.nombre_gasto}</option>`).join('');
+          document.getElementById('selAgencia').innerHTML =
+            `<option value="">-- Ninguna --</option>` +
+            res.agencias.map(a => `<option value="${a.id_agencia}">${a.nombre_agencia}</option>`).join('');
         }
       })
-      .catch(e => console.error("Error cargando conceptos/agencias", e));
-
-      // Solo lee las sedes existentes para mostrarlas en el formulario, NO intenta crearlas de nuevo
-      cargarSedesEnFormulario();
+      .catch(e => console.error("Error cargando maestros", e));
     }
 
-    // --- JALAR LAS SEDES MAESTRAS DESDE BD ---
+    // ===================== SEDES =====================
     function cargarSedesEnFormulario() {
-      let comboSedes = document.getElementById('selSedeRequerimiento');
-      if(!comboSedes) return;
-
+      let combo = document.getElementById('selSedeRequerimiento');
+      if(!combo) return;
       fetch(API_URL + 'obtener_sedes.php')
       .then(r => r.json())
       .then(data => {
-        comboSedes.innerHTML = '<option value="">-- Seleccione un lugar --</option>';
-        data.forEach(sede => {
-            comboSedes.innerHTML += `<option value="${sede.nombre_sede}">${sede.nombre_sede}</option>`;
-        });
+        combo.innerHTML = '<option value="">-- Seleccione un lugar --</option>';
+        data.forEach(s => combo.innerHTML += `<option value="${s.nombre_sede}">${s.nombre_sede}</option>`);
       })
-      .catch(e => console.error("Error obteniendo el listado de sedes", e));
+      .catch(e => console.error("Error obteniendo sedes", e));
     }
 
-
-    // --- JALAR USUARIOS DE LA SEDE SELECCIONADA ---
-    function cargarUsuariosPorSede(sedeSeleccionada) {
-      let comboUser = document.getElementById('selUsuarioRequerimiento');
-      if(!comboUser) return;
-      
-      comboUser.innerHTML = '<option value="">Cargando personal...</option>';
-      
-      if(!sedeSeleccionada) {
-          comboUser.innerHTML = '<option value="">-- Seleccione una sede primero --</option>';
-          return;
-      }
-
-      fetch(API_URL + 'obtener_usuarios_sede.php?sede=' + encodeURIComponent(sedeSeleccionada))
+    function cargarSedesEnSelectUsuario() {
+      let combo = document.getElementById('selSedeUsuario');
+      if(!combo) return;
+      fetch(API_URL + 'obtener_sedes.php')
       .then(r => r.json())
       .then(data => {
-          if(data.length === 0) {
-              comboUser.innerHTML = '<option value="">⚠️ No hay usuarios en esta sede</option>';
-              return;
-          }
-          comboUser.innerHTML = '<option value="">-- Seleccione quién solicita --</option>';
-          data.forEach(user => {
-              comboUser.innerHTML += `<option value="${user.id_usuario}">${user.nombre_completo}</option>`;
-          });
-      })
-      .catch(e => {
-          comboUser.innerHTML = '<option value="">Error al conectar</option>';
+        combo.innerHTML = '<option value="">-- Seleccione sede --</option>';
+        data.forEach(s => combo.innerHTML += `<option value="${s.nombre_sede}">${s.nombre_sede}</option>`);
       });
     }
 
-    // --- LÓGICA DEL TICKET TEMPORAL DE CONCEPTOS ---
+    // ===================== USUARIOS POR SEDE =====================
+    function cargarUsuariosPorSede(sede) {
+      let combo = document.getElementById('selUsuarioRequerimiento');
+      if(!combo) return;
+      if(!sede) { combo.innerHTML = '<option value="">-- Seleccione una sede primero --</option>'; return; }
+
+      combo.innerHTML = '<option value="">Cargando personal...</option>';
+      fetch(API_URL + 'obtener_usuarios_sede.php?sede=' + encodeURIComponent(sede))
+      .then(r => r.json())
+      .then(data => {
+        if(data.length === 0) {
+          combo.innerHTML = '<option value="">⚠️ No hay usuarios en esta sede</option>';
+          return;
+        }
+        combo.innerHTML = '<option value="">-- Seleccione quién solicita --</option>';
+        data.forEach(u => combo.innerHTML += `<option value="${u.id_usuario}">${u.nombre_completo}</option>`);
+      })
+      .catch(() => combo.innerHTML = '<option value="">Error al conectar</option>');
+    }
+
+    // ===================== TABLA TEMPORAL DE ÍTEMS =====================
     function agregarItemTabla() {
       let idConcepto = document.getElementById('selConcepto').value;
-      let idAgencia = document.getElementById('selAgencia').value;
-      let importe = parseFloat(document.getElementById('txtImporte').value);
+      let idAgencia  = document.getElementById('selAgencia').value;
+      let importe    = parseFloat(document.getElementById('txtImporte').value);
 
+      if(!idConcepto) return alert("Seleccione un concepto de gasto.");
       if(!importe || importe <= 0) return alert("Ingrese un importe válido.");
 
-      let textConcepto = document.getElementById('selConcepto').options[document.getElementById('selConcepto').selectedIndex].text;
-      let textAgencia = idAgencia ? document.getElementById('selAgencia').options[document.getElementById('selAgencia').selectedIndex].text : "N/A";
+      let selC = document.getElementById('selConcepto');
+      let selA = document.getElementById('selAgencia');
+      let textConcepto = selC.options[selC.selectedIndex].text;
+      let textAgencia  = idAgencia ? selA.options[selA.selectedIndex].text : "N/A";
 
       listaItemsTemporal.push({
-        id_concepto: idConcepto,
+        id_concepto:    idConcepto,
         nombre_concepto: textConcepto,
-        id_agencia: idAgencia ? idAgencia : "N/A",
+        id_agencia:     idAgencia || "N/A",
         nombre_agencia: textAgencia,
-        importe: importe
+        importe:        importe
       });
 
       document.getElementById('txtImporte').value = '';
@@ -469,43 +410,42 @@
       let tbody = document.querySelector('#tablaTemporal tbody');
       tbody.innerHTML = '';
       let total = 0;
-
-      listaItemsTemporal.forEach((item, index) => {
+      listaItemsTemporal.forEach((item, i) => {
         total += item.importe;
         tbody.innerHTML += `
           <tr>
             <td>${item.nombre_concepto}</td>
             <td>${item.nombre_agencia}</td>
             <td>S/. ${item.importe.toFixed(2)}</td>
-            <td><button class="btn-danger" onclick="removerItemTemporal(${index})">❌</button></td>
-          </tr>
-        `;
+            <td><button class="btn-danger" onclick="removerItemTemporal(${i})">❌</button></td>
+          </tr>`;
       });
-
       document.getElementById('lblTotalTicket').innerText = total.toFixed(2);
     }
 
-    // --- GUARDAR REQUERIMIENTO COMPLETO ---
+    // ===================== EMITIR TICKET =====================
     function emitirTicket() {
-      let sede = document.getElementById('selSedeRequerimiento').value;
+      let sede       = document.getElementById('selSedeRequerimiento').value;
       let solicitante = document.getElementById('selUsuarioRequerimiento').value;
-      let glosa = document.getElementById('txtDetalleGlosa').value;
-      let total = parseFloat(document.getElementById('lblTotalTicket').innerText);
+      let glosa      = document.getElementById('txtDetalleGlosa').value.trim();
+      let total      = parseFloat(document.getElementById('lblTotalTicket').innerText);
 
-      if(!sede || !solicitante || !glosa || listaItemsTemporal.length === 0) {
-        return alert("Complete Sede, Solicitante, Detalle y añada conceptos.");
-      }
+      if(!sede)        return alert("Seleccione una sede.");
+      if(!solicitante) return alert("Seleccione un solicitante.");
+      if(!glosa)       return alert("Ingrese el motivo del gasto.");
+      if(listaItemsTemporal.length === 0) return alert("Añada al menos un concepto al ticket.");
 
       let payload = {
-        id_usuario: solicitante, 
-        sede: sede,
-        detalles: glosa,
+        id_usuario:  solicitante,
+        sede:        sede,
+        detalles:    glosa,
         monto_total: total,
-        items: listaItemsTemporal
+        items:       listaItemsTemporal
       };
 
       fetch(API_URL + 'registrar_solicitud.php', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' }, // FIX: header agregado
         body: JSON.stringify(payload)
       })
       .then(r => r.json())
@@ -519,23 +459,27 @@
           renderizarTablaTemporal();
           abrirModulo('modulo-historial');
         }
-      });
+      })
+      .catch(() => alert("Error al conectar con el servidor."));
     }
 
-    // --- CARGAR HISTORIAL DE TICKETS ---
+    // ===================== HISTORIAL DE TICKETS =====================
     function cargarTickets() {
-      let payload = { rol: usuarioLogueado.rol, id_usuario: usuarioLogueado.id_usuario };
-
+      // FIX: antes iteraba sobre data directamente, ahora usa data.tickets
       fetch(API_URL + 'obtener_tickets.php', {
         method: 'POST',
-        body: JSON.stringify(payload)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rol: usuarioLogueado.rol, id_usuario: usuarioLogueado.id_usuario })
       })
       .then(r => r.json())
       .then(data => {
         let tbody = document.querySelector('#tablaTickets tbody');
         tbody.innerHTML = '';
-        
-        data.forEach(t => {
+        if(!data.success || data.tickets.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#999;">No hay requerimientos registrados.</td></tr>';
+          return;
+        }
+        data.tickets.forEach(t => {
           tbody.innerHTML += `
             <tr>
               <td><strong>${t.id_solicitud}</strong></td>
@@ -544,65 +488,98 @@
               <td>${t.sede}</td>
               <td>S/. ${parseFloat(t.monto_total).toFixed(2)}</td>
               <td><span style="padding:4px 8px; border-radius:12px; font-weight:bold; background:#fff8e1; color:#f57f17;">${t.estado_actual}</span></td>
-              <td><button class="btn-primary" style="padding:6px; font-size:12px;" onclick="alert('Detalle: '+ '${t.sede}')">Ver</button></td>
-            </tr>
-          `;
+              <td><button class="btn-primary" style="padding:6px; font-size:12px; width:auto;" onclick="verDetalleTicket('${t.id_solicitud}')">Ver</button></td>
+            </tr>`;
         });
-      });
+      })
+      .catch(() => alert("Error cargando la bandeja."));
     }
 
-    // --- REGISTRAR NUEVA SEDE EN BASE DE DATOS ---
-    function crearSede() {
-      let nombreSede = document.getElementById('txtNuevaSedeAdmin').value;
-      if(!nombreSede) return alert("Ingrese el nombre de la sede.");
+    function verDetalleTicket(id) {
+      let ticket = null;
+      // Buscar en los datos ya cargados no es posible sin estado global, mostramos info básica
+      alert("Ticket: " + id + "\nPara ver el detalle completo consulte en la bandeja.");
+    }
 
-      fetch(API_URL + 'registrar_sede.php', { 
-          method: 'POST', 
-          body: JSON.stringify({ nombre_sede: nombreSede }) 
+    // ===================== REGISTRAR USUARIO =====================
+    function registrarUsuario() {
+      let nombre = document.getElementById('txtNombreUsuario').value.trim();
+      let correo = document.getElementById('txtCorreoUsuario').value.trim();
+      let pass   = document.getElementById('txtPassUsuario').value;
+      let rol    = document.getElementById('selRolUsuario').value;
+      let sede   = document.getElementById('selSedeUsuario').value;
+
+      if(!nombre || !correo || !pass || !sede) return alert("Complete todos los campos.");
+      if(pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
+
+      fetch(API_URL + 'registrar_usuario.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, correo, password: pass, rol, sede })
       })
       .then(r => r.json())
       .then(res => {
         alert(res.message);
         if(res.success) {
-           document.getElementById('txtNuevaSedeAdmin').value = '';
-           cargarSedesEnFormulario(); // Recargar el combo inmediatamente
+          document.getElementById('txtNombreUsuario').value = '';
+          document.getElementById('txtCorreoUsuario').value = '';
+          document.getElementById('txtPassUsuario').value   = '';
         }
-      });
+      })
+      .catch(() => alert("Error al registrar el usuario."));
     }
 
-    // --- DIBUJAR REPORTES CON CHART.JS ---
+    // ===================== CREAR SEDE =====================
+    function crearSede() {
+      let nombre = document.getElementById('txtNuevaSedeAdmin').value.trim();
+      if(!nombre) return alert("Ingrese el nombre de la sede.");
+
+      fetch(API_URL + 'registrar_sede.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre_sede: nombre })
+      })
+      .then(r => r.json())
+      .then(res => {
+        alert(res.message);
+        if(res.success) {
+          document.getElementById('txtNuevaSedeAdmin').value = '';
+          cargarSedesEnFormulario();
+        }
+      })
+      .catch(() => alert("Error al crear la sede."));
+    }
+
+    // ===================== REPORTES =====================
     function cargarReportes() {
       fetch(API_URL + 'obtener_reportes.php')
       .then(r => r.json())
       .then(res => {
         if(res.success) {
-          dibujarGrafico('chartEstado', 'doughnut', res.porEstado, chartEstadoInst, (chart) => chartEstadoInst = chart);
-          dibujarGrafico('chartConcepto', 'bar', res.porConcepto, chartConceptoInst, (chart) => chartConceptoInst = chart);
+          dibujarGrafico('chartEstado',   'doughnut', res.porEstado,   chartEstadoInst,   c => chartEstadoInst = c);
+          dibujarGrafico('chartConcepto', 'bar',      res.porConcepto, chartConceptoInst, c => chartConceptoInst = c);
         }
-      }).catch(e => console.error("Error cargando gráficos", e));
+      })
+      .catch(e => console.error("Error cargando gráficos", e));
     }
 
     function dibujarGrafico(idCanvas, tipo, datos, instanciaPrevia, setInstancia) {
       if(instanciaPrevia) instanciaPrevia.destroy();
-
-      let etiquetas = datos.map(d => d.etiqueta || 'Sin Asignar');
-      let valores = datos.map(d => parseFloat(d.total));
-      
       let ctx = document.getElementById(idCanvas).getContext('2d');
-      let nuevoGrafico = new Chart(ctx, {
+      let nuevo = new Chart(ctx, {
         type: tipo,
         data: {
-          labels: etiquetas,
+          labels: datos.map(d => d.etiqueta || 'Sin Asignar'),
           datasets: [{
             label: 'Total (S/.)',
-            data: valores,
-            backgroundColor: ['#FFB81C', '#1a1a1a', '#d32f2f', '#1565c0', '#4caf50'],
+            data: datos.map(d => parseFloat(d.total)),
+            backgroundColor: ['#FFB81C','#1a1a1a','#d32f2f','#1565c0','#4caf50'],
             borderWidth: 1
           }]
         },
         options: { responsive: true }
       });
-      setInstancia(nuevoGrafico);
+      setInstancia(nuevo);
     }
   </script>
 </body>
