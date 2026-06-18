@@ -661,7 +661,7 @@ function emitirTicket() {
   if (!glosa) return alert("Ingrese el motivo del gasto.");
   if (listaItems.length === 0) return alert("Añada al menos un concepto.");
   fetch(API_URL + 'registrar_solicitud.php', { method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ id_usuario:sol, sede, detalles:glosa, monto_total:total, items:listaItems }) })
+    body: JSON.stringify({ id_usuario:sol, sede, glosa, monto_total:total, items:listaItems }) })
   .then(r => r.json()).then(res => {
     alert(res.message);
     if (res.success) {
@@ -808,7 +808,7 @@ function confirmarRendicion() {
   let gastado = parseFloat(document.getElementById('txtMontoGastado').value);
   let obs     = document.getElementById('txtObsRendicion').value;
   if (isNaN(gastado)) return alert("Ingrese el monto gastado.");
-  fetch(API_URL + 'registrar_rendicion.php', { method:'POST', headers:{'Content-Type':'application/json'},
+  fetch(API_URL + 'registrar_rtendicion.php', { method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({ id_solicitud:id, monto_gastado:gastado, id_usuario:usuarioLogueado.id_usuario, observacion:obs }) })
   .then(r => r.json()).then(res => {
     alert(res.message + (res.monto_devuelto > 0 ? `\nDevolver: S/. ${parseFloat(res.monto_devuelto).toFixed(2)}` : ''));
@@ -1139,4 +1139,4 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
 });
 </script>
 </body>
-</html>
+</html>l>
