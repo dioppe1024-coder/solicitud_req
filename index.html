@@ -384,8 +384,10 @@
           document.getElementById('selConcepto').innerHTML = res.conceptos.map(c => `<option value="${c.id_concepto}">${c.nombre_gasto}</option>`).join('');
           document.getElementById('selAgencia').innerHTML = `<option value="">-- Ninguna --</option>` + res.agencias.map(a => `<option value="${a.id_agencia}">${a.nombre_agencia}</option>`).join('');
         }
-      });
+      })
+      .catch(e => console.error("Error cargando conceptos/agencias", e));
 
+      // Solo lee las sedes existentes para mostrarlas en el formulario, NO intenta crearlas de nuevo
       cargarSedesEnFormulario();
     }
 
@@ -402,8 +404,9 @@
             comboSedes.innerHTML += `<option value="${sede.nombre_sede}">${sede.nombre_sede}</option>`;
         });
       })
-      .catch(e => console.error("Error cargando sedes", e));
+      .catch(e => console.error("Error obteniendo el listado de sedes", e));
     }
+
 
     // --- JALAR USUARIOS DE LA SEDE SELECCIONADA ---
     function cargarUsuariosPorSede(sedeSeleccionada) {
